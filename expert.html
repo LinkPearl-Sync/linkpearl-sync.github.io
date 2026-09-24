@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Linkpearl Sync, under the hood</title>
+<meta name="description" content="How Linkpearl Sync connects players, encrypts and transfers appearances, how its rendezvous services federate, and how to host your own.">
+<meta name="theme-color" content="#07123a">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linkpearl Sync, under the hood">
+<meta property="og:description" content="Connection, encryption, transfers, federation, and a guide to host your own rendezvous service.">
+<meta property="og:url" content="https://linkpearl-sync.github.io/expert.html">
+<meta property="og:image" content="https://linkpearl-sync.github.io/assets/banner.png">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:ital,wght@0,400;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Même nuit que l'accueil ; ici on lit longtemps, donc une colonne étroite et
+   un corps plus posé. */
+:root{
+  color-scheme:dark;
+  --ink:#eaf1ff; --mute:#a9b8e6; --faint:#7f8dc0; --glow:#5fb4ff; --deep:#07123a; --pom:#ffa45c; --field:#040b26;
+  --line:rgba(143,196,255,.22); --card:rgba(255,255,255,.05);
+  --display:"Fredoka","Nunito",ui-rounded,system-ui,sans-serif;
+  --body:"Nunito",ui-rounded,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--deep);scroll-behavior:smooth}
+body{
+  margin:0;min-height:100vh;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.65;
+  background:
+    radial-gradient(ellipse 70% 420px at 50% 0,#1a3590 0%,transparent 70%),
+    linear-gradient(180deg,var(--deep) 0,#081650 60%,var(--deep) 100%);
+  padding-inline:16px;padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(48px + env(safe-area-inset-bottom,0px));
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.page{max-width:760px;margin-inline:auto;display:grid;gap:40px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.home{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-family:var(--display);font-weight:600;font-size:1.05rem}
+.home img{width:36px;height:36px}
+.home:hover span{color:var(--pom)}
+.langs{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:rgba(4,11,38,.6);border:1px solid var(--line)}
+.langs button{font:inherit;font-size:.82rem;font-weight:700;color:var(--mute);background:transparent;border:0;border-radius:999px;padding:4px 11px;cursor:pointer}
+.langs button:hover{color:var(--ink)}
+.langs button[aria-pressed="true"]{color:var(--ink);background:rgba(95,180,255,.18);box-shadow:0 0 0 1px var(--glow) inset}
+.langs button:focus-visible,.copy:focus-visible,a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.only{margin:0;padding:10px 14px;border-radius:12px;background:rgba(255,164,92,.1);border:1px solid rgba(255,164,92,.4);color:var(--ink);font-size:.92rem}
+
+/* Bascule de langue : sans script, l'anglais seul s'affiche. */
+html:not([data-l="fr"]) [data-v="fr"]{display:none}
+html[data-l="fr"] [data-v="en"]{display:none}
+
+.hero{display:grid;gap:14px}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(2rem,6vw,3rem);line-height:1.1;margin:0;text-wrap:balance}
+h1 em{font-style:normal;color:var(--glow);text-shadow:0 0 22px rgba(95,180,255,.55)}
+.lead{margin:0;color:var(--mute);font-size:1.08rem;max-width:62ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.toc a{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;font-size:.9rem;font-weight:700}
+.toc a::before{content:"";width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 18%,#bfe4ff 30%,#7a9cff 60%,#c79bff 100%);box-shadow:0 0 8px #7ec3ff}
+.toc a:hover{border-color:var(--glow)}
+.toc a.host::before{background:radial-gradient(circle at 35% 30%,#fff5ea 0 15%,#ffc58f 40%,#ff9344 85%);box-shadow:0 0 8px rgba(255,160,90,.8)}
+
+section{display:grid;gap:14px;scroll-margin-top:20px}
+section > div{display:grid;gap:14px}
+h2{font-family:var(--display);font-weight:600;font-size:1.65rem;line-height:1.2;margin:0;display:flex;align-items:center;gap:12px;text-wrap:balance}
+h2::before{content:"";width:16px;height:16px;flex:none;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 16%,#bfe4ff 30%,#7a9cff 60%,#c79bff 100%);box-shadow:0 0 12px #7ec3ff}
+#self-host h2::before{background:radial-gradient(circle at 35% 30%,#fff5ea 0 14%,#ffc58f 40%,#ff9344 85%);box-shadow:0 0 12px rgba(255,160,90,.8)}
+h3{font-family:var(--display);font-weight:600;font-size:1.15rem;margin:0}
+p{margin:0}
+p,li{max-width:66ch}
+ul,ol{margin:0;padding-left:1.3em;display:grid;gap:6px}
+a{color:var(--ink);text-decoration-color:rgba(234,241,255,.4);text-underline-offset:3px}
+a:hover{text-decoration-color:var(--pom)}
+strong{font-weight:800}
+code{font-family:var(--mono);font-size:.86em;background:rgba(4,11,38,.7);border:1px solid var(--line);border-radius:6px;padding:1px 6px;overflow-wrap:anywhere}
+.ui{font-weight:700;color:#ffd2ab}
+.small{color:var(--faint);font-size:.9rem}
+hr{border:0;height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:0}
+
+.fig{margin:6px 0;padding:14px;border-radius:18px;background:rgba(4,11,38,.55);border:1px solid var(--line)}
+.fig svg{display:block;width:100%;height:auto;max-width:100%}
+.fig figcaption{margin-top:8px;color:var(--faint);font-size:.88rem;text-align:center}
+svg text{font-family:var(--body);fill:var(--ink)}
+svg .m{fill:var(--mute)}
+svg .f{fill:var(--faint)}
+
+.tbl{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{text-align:left;padding:9px 14px;vertical-align:top}
+th{font-weight:800;background:rgba(95,180,255,.1);white-space:nowrap}
+tr + tr td{border-top:1px solid var(--line)}
+td.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+
+.note{padding:14px 16px;border-radius:14px;background:rgba(255,164,92,.08);border:1px solid rgba(255,164,92,.35)}
+.note strong{color:var(--pom)}
+
+.steps{counter-reset:s;list-style:none;padding:0;display:grid;gap:22px}
+.steps > li{counter-increment:s;position:relative;padding-left:44px;display:grid;gap:10px;max-width:none;min-width:0}
+.steps > li::before{content:counter(s);position:absolute;left:0;top:-2px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--display);font-weight:600;color:#2a1300;background:radial-gradient(circle at 35% 30%,#fff5ea 0 10%,#ffc58f 40%,#ff9344 90%);box-shadow:0 0 12px rgba(255,160,90,.55)}
+
+pre{position:relative;margin:0;padding:14px 16px;padding-right:86px;border-radius:14px;background:var(--field);border:1px solid rgba(95,180,255,.45);
+  overflow-x:auto;font-family:var(--mono);font-size:.84rem;line-height:1.6;color:#cfe6ff;max-width:100%}
+pre code{background:none;border:0;padding:0;font-size:inherit;overflow-wrap:normal}
+pre .c{color:var(--faint)}
+.copy{position:absolute;top:8px;right:8px;font:inherit;font-family:var(--body);font-size:.78rem;font-weight:800;cursor:pointer;
+  background:var(--pom);color:#2a1300;border:0;border-radius:999px;padding:4px 12px}
+
+footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var(--mute);font-size:.88rem;text-align:center}
+@media (max-width:560px){
+  body{font-size:16px}
+  pre{padding-right:16px;padding-top:40px}
+  .steps > li{padding-left:0;padding-top:38px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <a class="home" href="./"><img src="assets/logo.png" width="36" height="36" alt=""><span>Linkpearl Sync</span></a>
+    <nav class="langs" aria-label="Language">
+      <button type="button" data-lang="ja" lang="ja">日本語</button>
+      <button type="button" data-lang="en" lang="en">English</button>
+      <button type="button" data-lang="de" lang="de">Deutsch</button>
+      <button type="button" data-lang="fr" lang="fr">Français</button>
+    </nav>
+  </div>
+  <p class="only" id="only" hidden></p>
+
+  <header class="hero">
+    <div data-v="en">
+      <h1>Under the <em>hood</em></h1>
+      <p class="lead">How two games find each other, what gets encrypted and how, what a server can and cannot see, and how to run your own rendezvous service for your circle.</p>
+    </div>
+    <div data-v="fr">
+      <h1>Sous le <em>capot</em></h1>
+      <p class="lead">Comment deux jeux se trouvent, ce qui est chiffré et comment, ce qu'un serveur peut voir ou non, et comment faire tourner votre propre service de rendez-vous pour votre cercle.</p>
+    </div>
+    <ul class="toc" data-v="en">
+      <li><a href="#connect">Connecting</a></li>
+      <li><a href="#crypto">Encryption</a></li>
+      <li><a href="#transfer">Transfers</a></li>
+      <li><a href="#privacy">What servers see</a></li>
+      <li><a href="#federation">Federation</a></li>
+      <li><a class="host" href="#self-host">Host your own</a></li>
+    </ul>
+    <ul class="toc" data-v="fr">
+      <li><a href="#connect">Connexion</a></li>
+      <li><a href="#crypto">Chiffrement</a></li>
+      <li><a href="#transfer">Transferts</a></li>
+      <li><a href="#privacy">Ce que voient les serveurs</a></li>
+      <li><a href="#federation">Fédération</a></li>
+      <li><a class="host" href="#self-host">Héberger le vôtre</a></li>
+    </ul>
+  </header>
+
+  <!-- ============ Connexion ============ -->
+  <section id="connect">
+    <div data-v="en">
+      <h2>How two players connect</h2>
+      <p>No server holds your files. Your game talks straight to your friend's game. A small <strong>rendezvous service</strong> only helps the two of you find each other, and relays encrypted bytes when a direct connection is impossible.</p>
+      <figure class="fig">
+        <svg viewBox="0 0 600 190" role="img" aria-label="Two players linked directly; the rendezvous service sits above, only introducing them">
+          <defs>
+            <radialGradient id="pe" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="#cdeaff"/><stop offset=".6" stop-color="#8fb0ff"/><stop offset="1" stop-color="#9b7dff"/></radialGradient>
+          </defs>
+          <rect x="220" y="14" width="160" height="44" rx="12" fill="#0b1850" stroke="#5fb4ff" stroke-opacity=".5"/>
+          <text x="300" y="42" text-anchor="middle" font-size="15" font-weight="700">rendezvous</text>
+          <path d="M235 58 L105 118 M365 58 L495 118" stroke="#a9b8e6" stroke-width="1.5" stroke-dasharray="5 6" fill="none"/>
+          <text x="150" y="76" class="f" font-size="12" text-anchor="middle">introduces</text>
+          <text x="455" y="76" class="f" font-size="12" text-anchor="middle">relays if needed</text>
+          <path d="M112 140 C 250 118, 350 162, 488 140" stroke="#5fb4ff" stroke-width="4" fill="none" opacity=".35"/>
+          <path d="M112 140 C 250 118, 350 162, 488 140" stroke="#bfe4ff" stroke-width="1.8" fill="none"/>
+          <circle cx="90" cy="140" r="22" fill="url(#pe)"/>
+          <circle cx="510" cy="140" r="22" fill="url(#pe)"/>
+          <text x="90" y="182" text-anchor="middle" font-size="14" font-weight="700">you</text>
+          <text x="510" y="182" text-anchor="middle" font-size="14" font-weight="700">your friend</text>
+          <text x="300" y="176" text-anchor="middle" class="m" font-size="13">direct, end-to-end encrypted</text>
+        </svg>
+      </figure>
+      <ol>
+        <li><strong>Discovery.</strong> Each plugin opens a mailbox on the rendezvous. Its address is computed from the character's name and world: <code>SHA-256("linkpearl:mbox:v1" ‖ name@world ‖ window)</code>, truncated. Anyone who sees your character can compute it; that is how the orange glyph appears next to players who use Linkpearl.</li>
+        <li><strong>Pairing.</strong> A request lands in the target's mailbox. They accept in game, and each side stores the other's public key in its local peer book. Nobody ever has to see a key.</li>
+        <li><strong>Connection.</strong> Every ten minutes, both sides announce a ticket derived from a secret only the pair shares: <code>HMAC-SHA256(secret, "lp:rv:v1" ‖ ⌊unix / 600⌋)</code>. When two announcements match, the service swaps the two addresses. The address lists are sealed under a key derived from that same secret, so the service can't read them. The plugins then try each other's addresses in priority order (local network, then the public address the service observed) and punch through the NAT.</li>
+      </ol>
+      <p><strong>When no direct path exists</strong> (some strict NATs), the rendezvous service can relay the session, which stays end-to-end encrypted: it only sees sealed bytes. The service already supports it; the plugin is being wired to use it. Until then, such a pair can't connect.</p>
+      <p>A direct connection shows your IP address to your peer, as in any peer-to-peer game or voice chat. Only people you paired with ever get it.</p>
+    </div>
+    <div data-v="fr">
+      <h2>Comment deux joueurs se connectent</h2>
+      <p>Aucun serveur ne détient vos fichiers. Votre jeu parle directement à celui de votre ami. Un petit <strong>service de rendez-vous</strong> vous aide seulement à vous trouver, et relaie des octets chiffrés quand la connexion directe est impossible.</p>
+      <figure class="fig">
+        <svg viewBox="0 0 600 190" role="img" aria-label="Deux joueurs reliés directement ; le service de rendez-vous, au-dessus, ne fait que les présenter">
+          <defs>
+            <radialGradient id="pf" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="#cdeaff"/><stop offset=".6" stop-color="#8fb0ff"/><stop offset="1" stop-color="#9b7dff"/></radialGradient>
+          </defs>
+          <rect x="220" y="14" width="160" height="44" rx="12" fill="#0b1850" stroke="#5fb4ff" stroke-opacity=".5"/>
+          <text x="300" y="42" text-anchor="middle" font-size="15" font-weight="700">rendez-vous</text>
+          <path d="M235 58 L105 118 M365 58 L495 118" stroke="#a9b8e6" stroke-width="1.5" stroke-dasharray="5 6" fill="none"/>
+          <text x="150" y="76" class="f" font-size="12" text-anchor="middle">vous présente</text>
+          <text x="455" y="76" class="f" font-size="12" text-anchor="middle">relaie au besoin</text>
+          <path d="M112 140 C 250 118, 350 162, 488 140" stroke="#5fb4ff" stroke-width="4" fill="none" opacity=".35"/>
+          <path d="M112 140 C 250 118, 350 162, 488 140" stroke="#bfe4ff" stroke-width="1.8" fill="none"/>
+          <circle cx="90" cy="140" r="22" fill="url(#pf)"/>
+          <circle cx="510" cy="140" r="22" fill="url(#pf)"/>
+          <text x="90" y="182" text-anchor="middle" font-size="14" font-weight="700">vous</text>
+          <text x="510" y="182" text-anchor="middle" font-size="14" font-weight="700">votre ami</text>
+          <text x="300" y="176" text-anchor="middle" class="m" font-size="13">direct, chiffré de bout en bout</text>
+        </svg>
+      </figure>
+      <ol>
+        <li><strong>Détection.</strong> Chaque plugin ouvre une boîte aux lettres sur le rendez-vous. Son adresse se calcule depuis le nom et le monde du personnage : <code>SHA-256("linkpearl:mbox:v1" ‖ nom@monde ‖ fenêtre)</code>, tronqué. Quiconque voit votre personnage peut la calculer ; c'est ainsi que le glyphe orange apparaît à côté des joueurs qui utilisent Linkpearl.</li>
+        <li><strong>Pairage.</strong> Une demande arrive dans la boîte de la cible. Elle accepte en jeu, et chacun range la clé publique de l'autre dans son carnet local. Personne n'a jamais à voir une clé.</li>
+        <li><strong>Connexion.</strong> Toutes les dix minutes, chacun annonce un ticket dérivé d'un secret que seule la paire connaît : <code>HMAC-SHA256(secret, "lp:rv:v1" ‖ ⌊unix / 600⌋)</code>. Quand deux annonces correspondent, le service échange les deux adresses. Les listes d'adresses sont scellées sous une clé dérivée de ce même secret, donc le service ne peut pas les lire. Les plugins essaient alors les adresses de l'autre par ordre de priorité (réseau local, puis l'adresse publique que le service a observée) et percent le NAT.</li>
+      </ol>
+      <p><strong>Quand aucun chemin direct n'existe</strong> (certains NAT stricts), le service de rendez-vous peut relayer la session, qui reste chiffrée de bout en bout : il ne voit que des octets scellés. Le service le sait déjà ; le plugin est en train d'être branché dessus. D'ici là, une telle paire ne peut pas se connecter.</p>
+      <p>Une connexion directe montre votre adresse IP à votre pair, comme tout jeu ou chat vocal en pair à pair. Seules les personnes avec qui vous vous êtes pairé l'obtiennent.</p>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ============ Chiffrement ============ -->
+  <section id="crypto">
+    <div data-v="en">
+      <h2>Encryption</h2>
+      <p>Everything comes from .NET's standard library, with no third-party cryptography.</p>
+      <div class="tbl"><table>
+        <tr><th>Role</th><th>Primitive</th></tr>
+        <tr><td>Identity, signatures</td><td>ECDSA P-256, SHA-256</td></tr>
+        <tr><td>Key agreement</td><td>ECDH P-256, ephemeral for every session</td></tr>
+        <tr><td>Key derivation</td><td>HKDF-SHA256</td></tr>
+        <tr><td>Authenticated encryption</td><td>AES-256-GCM</td></tr>
+        <tr><td>Content addressing</td><td>SHA-256</td></tr>
+      </table></div>
+      <ul>
+        <li><strong>One identity per character</strong>, generated on your PC. The private key never leaves it, except inside the backup file you choose to make.</li>
+        <li><strong>SIGMA-I handshake</strong>: mutual authentication over a transcript that includes both ephemeral keys, and forward secrecy. Stealing an identity key later does not decrypt past sessions. A 60-second timestamp window blocks replays.</li>
+        <li><strong>Authorization comes from your local peer book only.</strong> The received public key must already be there as accepted, and it is checked before any cryptographic work.</li>
+        <li><strong>Data channel</strong>: each message is sealed with AES-256-GCM. The nonce carries the channel index, so two channels can never reuse one, and counters only advance after authentication.</li>
+      </ul>
+      <p class="note"><strong>Not reviewed yet.</strong> The handshake is a custom construction and no outside cryptographer has reviewed it. It is written up in <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/blob/main/docs/protocol.md">docs/protocol.md</a> (French) precisely so it can be. If this is your field, a review is very welcome.</p>
+    </div>
+    <div data-v="fr">
+      <h2>Chiffrement</h2>
+      <p>Tout vient de la bibliothèque standard de .NET, sans cryptographie tierce.</p>
+      <div class="tbl"><table>
+        <tr><th>Rôle</th><th>Primitive</th></tr>
+        <tr><td>Identité, signatures</td><td>ECDSA P-256, SHA-256</td></tr>
+        <tr><td>Accord de clé</td><td>ECDH P-256, éphémère à chaque session</td></tr>
+        <tr><td>Dérivation</td><td>HKDF-SHA256</td></tr>
+        <tr><td>Chiffrement authentifié</td><td>AES-256-GCM</td></tr>
+        <tr><td>Adressage de contenu</td><td>SHA-256</td></tr>
+      </table></div>
+      <ul>
+        <li><strong>Une identité par personnage</strong>, engendrée sur votre PC. La clé privée ne le quitte jamais, sauf dans le fichier de sauvegarde que vous choisissez de faire.</li>
+        <li><strong>Handshake SIGMA-I</strong> : authentification mutuelle sur un transcript qui contient les deux clés éphémères, et confidentialité persistante. Voler une clé d'identité plus tard ne déchiffre pas les sessions passées. Une fenêtre de 60 secondes sur l'horodatage bloque les rejeux.</li>
+        <li><strong>L'autorisation vient de votre seul carnet local.</strong> La clé publique reçue doit déjà y figurer comme acceptée, et elle est comparée avant tout travail cryptographique.</li>
+        <li><strong>Canal de données</strong> : chaque message est scellé en AES-256-GCM. Le nonce porte l'index du canal, donc deux canaux ne peuvent jamais en réutiliser un, et les compteurs n'avancent qu'après authentification.</li>
+      </ul>
+      <p class="note"><strong>Pas encore relu.</strong> Le handshake est une construction maison, qu'aucun cryptographe extérieur n'a relue. Il est décrit dans <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/blob/main/docs/protocol.md">docs/protocol.md</a> justement pour pouvoir l'être. Si c'est votre domaine, une relecture est la bienvenue.</p>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ============ Transferts ============ -->
+  <section id="transfer">
+    <div data-v="en">
+      <h2>Transfers and cache</h2>
+      <ul>
+        <li><strong>Files are named by their content.</strong> Each one is stored under the SHA-256 of its bytes, recomputed on receipt. Nothing that comes from the network ever becomes a file name.</li>
+        <li><strong>Deduplication for free.</strong> If three peers use the same skin texture, it is downloaded once. A peer seen again the next day with no change costs zero bytes: only their manifest travels.</li>
+        <li><strong>Built for heavy looks.</strong> An average modded appearance weighs around 800 MB. Files are cut into 4 MiB segments spread over 32 parallel channels, because a single LiteNetLib channel caps out around 1.5 MB/s at 60 ms of latency.</li>
+        <li><strong>Everything received is checked before it reaches Penumbra or your disk</strong>: game paths, extensions, sizes, number of entries. A manifest that breaks a single rule is rejected as a whole. Animations are also checked against the skeleton they target.</li>
+        <li><strong>The cache speeds things up; it never stands in for consent.</strong> A peer you can't reach keeps their default look, even if their last appearance is still cached.</li>
+      </ul>
+      <div class="tbl"><table>
+        <tr><th>Simulated latency</th><th>0 ms</th><th>20 ms</th><th>60 ms</th></tr>
+        <tr><td>Throughput, 405 MB look</td><td class="num">53.8 MB/s</td><td class="num">33.0 MB/s</td><td class="num">17.5 MB/s</td></tr>
+      </table></div>
+      <p class="small">Measured on a test bench, on one machine, with the real transfer engine on both sides. Real networks will vary. The upload limiter exists but is off by default.</p>
+    </div>
+    <div data-v="fr">
+      <h2>Transferts et cache</h2>
+      <ul>
+        <li><strong>Les fichiers sont nommés par leur contenu.</strong> Chacun est rangé sous le SHA-256 de ses octets, recalculé à la réception. Rien de ce qui vient du réseau ne devient jamais un nom de fichier.</li>
+        <li><strong>Déduplication gratuite.</strong> Si trois pairs utilisent la même texture de peau, elle n'est téléchargée qu'une fois. Un pair revu le lendemain sans changement coûte zéro octet : seul son manifeste voyage.</li>
+        <li><strong>Pensé pour les apparences lourdes.</strong> Une apparence moddée moyenne pèse environ 800 Mo. Les fichiers sont découpés en tronçons de 4 Mio répartis sur 32 canaux parallèles, parce qu'un canal LiteNetLib seul plafonne vers 1,5 Mo/s à 60 ms de latence.</li>
+        <li><strong>Tout ce qui est reçu est contrôlé avant d'atteindre Penumbra ou votre disque</strong> : chemins de jeu, extensions, tailles, nombre d'entrées. Un manifeste qui viole une seule règle est rejeté en entier. Les animations sont aussi vérifiées contre le squelette qu'elles visent.</li>
+        <li><strong>Le cache accélère, il ne remplace pas le consentement.</strong> Un pair injoignable garde son apparence par défaut, même si sa dernière apparence est encore en cache.</li>
+      </ul>
+      <div class="tbl"><table>
+        <tr><th>Latence simulée</th><th>0 ms</th><th>20 ms</th><th>60 ms</th></tr>
+        <tr><td>Débit, apparence de 405 Mo</td><td class="num">53,8 Mo/s</td><td class="num">33,0 Mo/s</td><td class="num">17,5 Mo/s</td></tr>
+      </table></div>
+      <p class="small">Mesuré sur un banc d'essai, sur une seule machine, avec le vrai moteur de transfert des deux côtés. Un vrai réseau donnera autre chose. Le limiteur d'envoi existe mais il est désactivé par défaut.</p>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ============ Vie privée ============ -->
+  <section id="privacy">
+    <div data-v="en">
+      <h2>What a rendezvous service sees</h2>
+      <div class="tbl"><table>
+        <tr><th>It sees</th><th>It never sees</th></tr>
+        <tr><td>IP addresses</td><td>Your files and appearances</td></tr>
+        <tr><td>Which characters are online, if they are discoverable</td><td>Manifests, keys, the content of requests</td></tr>
+        <tr><td>That two tickets match in a ten-minute window</td><td>What peers exchange once connected</td></tr>
+      </table></div>
+      <p><strong>Being discoverable means being discoverable.</strong> For a stranger to recognise you in game, your mailbox address has to derive from your name, and FFXIV names can be enumerated. So the operator of a service can tell which characters are online. You can opt out with <span class="ui">Me signaler aux autres joueurs</span> (let other players see me) in <span class="ui">Réglages › Visibilité</span>; then nobody can spot you or send you a request.</p>
+      <p>What a service keeps: nothing about usage. Mailboxes, tickets and pending requests live in memory and vanish on restart. By default its log says what happens, never to whom: no IP addresses, no ticket fragments.</p>
+      <p><strong>A rendezvous is not an authority.</strong> It can make a connection fail; it cannot read your files or pass itself off as a peer you already paired with. One caveat, stated plainly: a pairing request goes through the target's mailbox, so a malicious operator could slip in at that moment. That is why the choice of services matters, and why a circle running its own is the strongest setup: the operator is one of you.</p>
+    </div>
+    <div data-v="fr">
+      <h2>Ce que voit un service de rendez-vous</h2>
+      <div class="tbl"><table>
+        <tr><th>Il voit</th><th>Il ne voit jamais</th></tr>
+        <tr><td>Les adresses IP</td><td>Vos fichiers et vos apparences</td></tr>
+        <tr><td>Quels personnages sont en ligne, s'ils sont détectables</td><td>Les manifestes, les clés, le contenu des demandes</td></tr>
+        <tr><td>Que deux tickets correspondent dans une fenêtre de dix minutes</td><td>Ce que les pairs échangent une fois connectés</td></tr>
+      </table></div>
+      <p><strong>Être détectable, c'est être détectable.</strong> Pour qu'un inconnu vous reconnaisse en jeu, l'adresse de votre boîte doit dériver de votre nom, et les noms de FFXIV s'énumèrent. L'opérateur d'un service peut donc savoir quels personnages sont en ligne. Vous pouvez vous en retirer avec <span class="ui">Me signaler aux autres joueurs</span> dans <span class="ui">Réglages › Visibilité</span> ; personne ne peut alors vous repérer ni vous envoyer de demande.</p>
+      <p>Ce qu'un service conserve : rien de l'usage. Boîtes, tickets et demandes en attente vivent en mémoire et disparaissent au redémarrage. Par défaut, son journal dit ce qui se passe, jamais à qui : ni adresse IP, ni fragment de ticket.</p>
+      <p><strong>Un rendez-vous n'est pas une autorité.</strong> Il peut faire échouer une connexion ; il ne peut ni lire vos fichiers ni se faire passer pour un pair déjà établi. Une réserve, dite franchement : une demande de pairage passe par la boîte de la cible, donc un opérateur malveillant pourrait s'intercaler à ce moment-là. C'est pourquoi le choix des services compte, et pourquoi un cercle qui fait tourner le sien est la configuration la plus sûre : l'opérateur est l'un des vôtres.</p>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ============ Fédération ============ -->
+  <section id="federation">
+    <div data-v="en">
+      <h2>Federation</h2>
+      <p>There is no central server. Anyone can run a rendezvous service, and the plugin talks to <strong>every service in your list</strong> at once (<span class="ui">Réglages › Réseau › Services de rendez-vous</span>, Settings › Network › Rendezvous services).</p>
+      <figure class="fig">
+        <svg viewBox="0 0 600 220" role="img" aria-label="Three services A, B and C. Alice uses A and B, Bob uses B, Chloé uses C.">
+          <defs>
+            <radialGradient id="qe" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="#cdeaff"/><stop offset=".6" stop-color="#8fb0ff"/><stop offset="1" stop-color="#9b7dff"/></radialGradient>
+          </defs>
+          <g stroke="#a9b8e6" stroke-width="1.5" stroke-dasharray="5 6" fill="none">
+            <path d="M150 64 L200 150"/><path d="M300 64 L210 150"/><path d="M300 64 L390 150"/><path d="M470 64 L525 150"/>
+          </g>
+          <path d="M218 168 L372 168" stroke="#5fb4ff" stroke-width="4" opacity=".35"/>
+          <path d="M218 168 L372 168" stroke="#bfe4ff" stroke-width="1.8"/>
+          <g font-size="15" font-weight="700" text-anchor="middle">
+            <rect x="100" y="20" width="100" height="44" rx="12" fill="#0b1850" stroke="#5fb4ff" stroke-opacity=".5"/><text x="150" y="48">A</text>
+            <rect x="250" y="20" width="100" height="44" rx="12" fill="#0b1850" stroke="#ffa45c" stroke-opacity=".8"/><text x="300" y="48">B</text>
+            <rect x="420" y="20" width="100" height="44" rx="12" fill="#0b1850" stroke="#5fb4ff" stroke-opacity=".5"/><text x="470" y="48">C</text>
+          </g>
+          <circle cx="200" cy="168" r="18" fill="url(#qe)"/>
+          <circle cx="390" cy="168" r="18" fill="url(#qe)"/>
+          <circle cx="530" cy="168" r="18" fill="url(#qe)" opacity=".55"/>
+          <g font-size="14" font-weight="700" text-anchor="middle">
+            <text x="200" y="208">Alice</text><text x="390" y="208">Bob</text><text x="530" y="208" class="m">Chloé</text>
+          </g>
+        </svg>
+        <figcaption>Alice and Bob share service B, so they see each other. Chloé shares none with them.</figcaption>
+      </figure>
+      <ul>
+        <li><strong>You see the players you share at least one service with.</strong></li>
+        <li><strong>A pairing survives the loss of a server.</strong> Each pair remembers the services both sides used when pairing, and announces on all of them in parallel; the first match wins.</li>
+        <li><strong>Servers ignore each other.</strong> None queries, relays for, or vouches for another. This is deliberate: if servers answered for each other, one your operator quietly added could claim someone's mailbox and slip into their pairings.</li>
+        <li><strong>Directories inform, they never decide.</strong> A service can publish the list of services it knows. The refresh button next to a service in your list shows it, and nothing is added until you tick it. A new service can apply to be listed, and waits for a human to approve.</li>
+        <li><strong>The price.</strong> Each active service learns that your character is online and who is around you. More services means more people you can see, and more operators who know. Keep the list short.</li>
+      </ul>
+    </div>
+    <div data-v="fr">
+      <h2>Fédération</h2>
+      <p>Il n'y a pas de serveur central. N'importe qui peut faire tourner un service de rendez-vous, et le plugin parle à <strong>tous les services de votre liste</strong> à la fois (<span class="ui">Réglages › Réseau › Services de rendez-vous</span>).</p>
+      <figure class="fig">
+        <svg viewBox="0 0 600 220" role="img" aria-label="Trois services A, B et C. Alice utilise A et B, Bob utilise B, Chloé utilise C.">
+          <defs>
+            <radialGradient id="qf" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="#cdeaff"/><stop offset=".6" stop-color="#8fb0ff"/><stop offset="1" stop-color="#9b7dff"/></radialGradient>
+          </defs>
+          <g stroke="#a9b8e6" stroke-width="1.5" stroke-dasharray="5 6" fill="none">
+            <path d="M150 64 L200 150"/><path d="M300 64 L210 150"/><path d="M300 64 L390 150"/><path d="M470 64 L525 150"/>
+          </g>
+          <path d="M218 168 L372 168" stroke="#5fb4ff" stroke-width="4" opacity=".35"/>
+          <path d="M218 168 L372 168" stroke="#bfe4ff" stroke-width="1.8"/>
+          <g font-size="15" font-weight="700" text-anchor="middle">
+            <rect x="100" y="20" width="100" height="44" rx="12" fill="#0b1850" stroke="#5fb4ff" stroke-opacity=".5"/><text x="150" y="48">A</text>
+            <rect x="250" y="20" width="100" height="44" rx="12" fill="#0b1850" stroke="#ffa45c" stroke-opacity=".8"/><text x="300" y="48">B</text>
+            <rect x="420" y="20" width="100" height="44" rx="12" fill="#0b1850" stroke="#5fb4ff" stroke-opacity=".5"/><text x="470" y="48">C</text>
+          </g>
+          <circle cx="200" cy="168" r="18" fill="url(#qf)"/>
+          <circle cx="390" cy="168" r="18" fill="url(#qf)"/>
+          <circle cx="530" cy="168" r="18" fill="url(#qf)" opacity=".55"/>
+          <g font-size="14" font-weight="700" text-anchor="middle">
+            <text x="200" y="208">Alice</text><text x="390" y="208">Bob</text><text x="530" y="208" class="m">Chloé</text>
+          </g>
+        </svg>
+        <figcaption>Alice et Bob partagent le service B, donc ils se voient. Chloé n'en partage aucun avec eux.</figcaption>
+      </figure>
+      <ul>
+        <li><strong>Vous voyez les joueurs avec qui vous partagez au moins un service.</strong></li>
+        <li><strong>Un pairage survit à la perte d'un serveur.</strong> Chaque paire retient les services des deux côtés au moment du pairage, et s'annonce sur tous en parallèle ; le premier qui apparie gagne.</li>
+        <li><strong>Les serveurs s'ignorent.</strong> Aucun n'en interroge, n'en relaie ni ne répond pour un autre. C'est voulu : si les serveurs répondaient les uns pour les autres, un serveur ajouté en douce par votre opérateur pourrait revendiquer la boîte de quelqu'un et s'intercaler dans ses pairages.</li>
+        <li><strong>Les annuaires informent, ils ne décident jamais.</strong> Un service peut publier la liste de ceux qu'il connaît. Le bouton d'actualisation à côté d'un service de votre liste l'affiche, et rien n'est ajouté tant que vous ne cochez pas. Un nouveau service peut demander à y figurer, et attend qu'un humain l'approuve.</li>
+        <li><strong>Le prix.</strong> Chaque service actif apprend que votre personnage est en ligne et qui se tient autour de vous. Plus de services, c'est plus de monde à voir, et plus d'opérateurs qui savent. Gardez la liste courte.</li>
+      </ul>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ============ Auto-hébergement ============ -->
+  <section id="self-host">
+    <div data-v="en">
+      <h2>Host your own rendezvous</h2>
+      <p>The service is one self-contained binary, <code>lprdv</code>. It needs no .NET runtime and no database.</p>
+      <p><strong>You need</strong> a Linux x86-64 server with a public IP address and systemd (a small VPS is enough; the provided unit caps the service at 512 MB of RAM), SSH access with sudo, and one port open in both <strong>TCP and UDP</strong>, 47900 by default.</p>
+      <p><strong>Bandwidth</strong>: introducing peers costs almost nothing. Relaying is what costs: once the plugin uses the relay, two players who can't connect directly will send their whole appearance, often hundreds of megabytes, through your server.</p>
+      <ol class="steps">
+        <li>
+          <h3>Install the service</h3>
+<pre><code><span class="c"># system account that runs the service</span>
+sudo useradd --system --home-dir /var/lib/lprdv --shell /usr/sbin/nologin lprdv
+
+<span class="c"># latest release, checked against its published checksum</span>
+cd /tmp
+curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv
+curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.sha256
+sha256sum -c lprdv.sha256
+sudo install -D -m 0755 lprdv /opt/lprdv/lprdv
+
+<span class="c"># hardened systemd unit, restarts on its own</span>
+sudo curl -fLo /etc/systemd/system/lprdv.service \
+  https://raw.githubusercontent.com/LinkPearl-Sync/linkpearl-sync-rendezvous/main/deploy/lprdv.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now lprdv</code></pre>
+        </li>
+        <li>
+          <h3>Open the port</h3>
+          <p>In TCP and UDP, on the server and in your host's firewall panel if it has one.</p>
+<pre><code>sudo ufw allow 47900</code></pre>
+        </li>
+        <li>
+          <h3>Check that it runs</h3>
+          <p>This should print <code>200</code>. The log never contains IP addresses unless you start the service with <code>--verbose</code>.</p>
+<pre><code>curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:47901/healthz
+journalctl -u lprdv -f</code></pre>
+        </li>
+        <li>
+          <h3>Add it in the plugin</h3>
+          <p>In game: <span class="ui">Réglages › Réseau › Services de rendez-vous</span>, type your server's address (<code>rdv.example.org</code>, or <code>rdv.example.org:47900</code> if you changed the port), then <span class="ui">Ajouter</span> (Add). Each friend does the same. Keep the default service in the list if you still want to see players outside your circle.</p>
+        </li>
+        <li>
+          <h3>Open the console (optional)</h3>
+          <p>The console shows the service's health, counters and history, and lets you approve directory applications. It only answers the server itself: reach it through an SSH tunnel, open <code>http://localhost:47901</code>, and log in with any user name and the token as password.</p>
+<pre><code>ssh -L 47901:127.0.0.1:47901 you@your-server
+sudo cat /var/lib/lprdv/admin.token</code></pre>
+        </li>
+        <li>
+          <h3>Join the federation (optional)</h3>
+          <p>To let your users discover other services, list them in <code>/var/lib/lprdv/peers.txt</code>, one <code>address&nbsp;&nbsp;label</code> per line. The file is re-read live. To appear in another service's directory, apply to it once at startup; its operator decides.</p>
+<pre><code>sudo systemctl edit lprdv</code></pre>
+          <p>Then, in the editor that opens:</p>
+<pre><code>[Service]
+ExecStart=
+ExecStart=/opt/lprdv/lprdv --port 47900 --announce-to directory.example.org --public-address rdv.example.org:47900 --label "My Free Company"</code></pre>
+        </li>
+        <li>
+          <h3>Update</h3>
+          <p>Download and check the new binary as in step 1, then:</p>
+<pre><code>sudo install -m 0755 /tmp/lprdv /opt/lprdv/lprdv
+sudo systemctl restart lprdv</code></pre>
+        </li>
+      </ol>
+      <p><strong>Back up <code>/var/lib/lprdv</code>.</strong> It holds your settings, your directory, and the ban list with its salt, which cannot be rebuilt. Nothing about your users is stored there.</p>
+      <p class="note"><strong>Moderation.</strong> The console keeps a ban list of characters, published as slow hashes at <code>/api/bans</code> so it can't serve as a directory of modders. The plugin does not apply these lists yet.</p>
+      <p>Every option is documented in the <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous">rendezvous repository</a> (and in <code>lprdv --help</code>, in French).</p>
+    </div>
+    <div data-v="fr">
+      <h2>Héberger votre propre rendez-vous</h2>
+      <p>Le service est un seul binaire autonome, <code>lprdv</code>. Il n'a besoin ni du runtime .NET ni de base de données.</p>
+      <p><strong>Il vous faut</strong> un serveur Linux x86-64 avec une adresse IP publique et systemd (un petit VPS suffit ; l'unité fournie plafonne le service à 512 Mo de mémoire), un accès SSH avec sudo, et un port ouvert en <strong>TCP et en UDP</strong>, 47900 par défaut.</p>
+      <p><strong>La bande passante</strong> : mettre les pairs en relation ne coûte presque rien. C'est le relais qui coûte : dès que le plugin s'en servira, deux joueurs qui ne peuvent pas se connecter directement feront passer toute leur apparence, souvent des centaines de mégaoctets, par votre serveur.</p>
+      <ol class="steps">
+        <li>
+          <h3>Installer le service</h3>
+<pre><code><span class="c"># compte système qui fait tourner le service</span>
+sudo useradd --system --home-dir /var/lib/lprdv --shell /usr/sbin/nologin lprdv
+
+<span class="c"># dernière version, vérifiée contre son empreinte publiée</span>
+cd /tmp
+curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv
+curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.sha256
+sha256sum -c lprdv.sha256
+sudo install -D -m 0755 lprdv /opt/lprdv/lprdv
+
+<span class="c"># unité systemd durcie, qui redémarre seule</span>
+sudo curl -fLo /etc/systemd/system/lprdv.service \
+  https://raw.githubusercontent.com/LinkPearl-Sync/linkpearl-sync-rendezvous/main/deploy/lprdv.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now lprdv</code></pre>
+        </li>
+        <li>
+          <h3>Ouvrir le port</h3>
+          <p>En TCP et en UDP, sur le serveur et dans le pare-feu de votre hébergeur s'il en a un.</p>
+<pre><code>sudo ufw allow 47900</code></pre>
+        </li>
+        <li>
+          <h3>Vérifier qu'il tourne</h3>
+          <p>Ceci doit afficher <code>200</code>. Le journal ne contient jamais d'adresse IP, sauf si vous lancez le service avec <code>--verbose</code>.</p>
+<pre><code>curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:47901/healthz
+journalctl -u lprdv -f</code></pre>
+        </li>
+        <li>
+          <h3>L'ajouter dans le plugin</h3>
+          <p>En jeu : <span class="ui">Réglages › Réseau › Services de rendez-vous</span>, tapez l'adresse de votre serveur (<code>rdv.exemple.fr</code>, ou <code>rdv.exemple.fr:47900</code> si vous avez changé le port), puis <span class="ui">Ajouter</span>. Chaque ami fait de même. Gardez le service par défaut dans la liste si vous voulez continuer à voir les joueurs hors de votre cercle.</p>
+        </li>
+        <li>
+          <h3>Ouvrir la console (facultatif)</h3>
+          <p>La console montre la santé du service, ses compteurs et leur historique, et permet d'approuver les candidatures à l'annuaire. Elle ne répond qu'au serveur lui-même : passez par un tunnel SSH, ouvrez <code>http://localhost:47901</code>, et connectez-vous avec n'importe quel identifiant et le jeton comme mot de passe.</p>
+<pre><code>ssh -L 47901:127.0.0.1:47901 vous@votre-serveur
+sudo cat /var/lib/lprdv/admin.token</code></pre>
+        </li>
+        <li>
+          <h3>Rejoindre la fédération (facultatif)</h3>
+          <p>Pour que vos utilisateurs découvrent d'autres services, listez-les dans <code>/var/lib/lprdv/peers.txt</code>, une ligne <code>adresse&nbsp;&nbsp;libellé</code> par service. Le fichier est relu à chaud. Pour figurer dans l'annuaire d'un autre service, portez-vous candidat une fois au démarrage ; son opérateur décide.</p>
+<pre><code>sudo systemctl edit lprdv</code></pre>
+          <p>Puis, dans l'éditeur qui s'ouvre :</p>
+<pre><code>[Service]
+ExecStart=
+ExecStart=/opt/lprdv/lprdv --port 47900 --announce-to annuaire.exemple.fr --public-address rdv.exemple.fr:47900 --label "Ma compagnie libre"</code></pre>
+        </li>
+        <li>
+          <h3>Mettre à jour</h3>
+          <p>Téléchargez et vérifiez le nouveau binaire comme à l'étape 1, puis :</p>
+<pre><code>sudo install -m 0755 /tmp/lprdv /opt/lprdv/lprdv
+sudo systemctl restart lprdv</code></pre>
+        </li>
+      </ol>
+      <p><strong>Sauvegardez <code>/var/lib/lprdv</code>.</strong> Il contient vos réglages, votre annuaire, et la liste de bannissement avec son sel, qui ne se reconstruit pas. Rien de vos utilisateurs n'y est stocké.</p>
+      <p class="note"><strong>Modération.</strong> La console tient une liste de personnages bannis, publiée sous forme d'empreintes lentes sur <code>/api/bans</code> pour qu'elle ne puisse pas servir d'annuaire des joueurs moddés. Le plugin n'applique pas encore ces listes.</p>
+      <p>Toutes les options sont décrites dans le <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous">dépôt du rendez-vous</a> et dans <code>lprdv --help</code>.</p>
+    </div>
+  </section>
+
+  <footer>
+    <a href="./" data-i18n="home">Home</a>
+    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin" data-i18n="plugin">Plugin source</a>
+    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous" data-i18n="rdv">Rendezvous source</a>
+    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/issues" data-i18n="bug">Report a problem</a>
+  </footer>
+</div>
+<script>
+// Cette page n'existe qu'en anglais et en français : un texte technique mal
+// traduit induirait en erreur. Le choix de langue reste pourtant commun avec
+// l'accueil, et un visiteur japonais ou allemand lit l'anglais avec un mot
+// qui le lui dit dans sa langue.
+const LANGS = ["ja", "en", "de", "fr"];
+const CHROME = {
+  en: { home: "Home", plugin: "Plugin source", rdv: "Rendezvous source", bug: "Report a problem", copy: "Copy", copied: "Copied ✓", only: "" },
+  fr: { home: "Accueil", plugin: "Code du plugin", rdv: "Code du rendez-vous", bug: "Signaler un problème", copy: "Copier", copied: "Copié ✓", only: "" },
+  de: { home: "Startseite", plugin: "Quellcode des Plugins", rdv: "Quellcode des Rendezvous-Dienstes", bug: "Problem melden", copy: "Kopieren", copied: "Kopiert ✓",
+        only: "Diese technische Seite gibt es nur auf Englisch und Französisch. Hier die englische Fassung." },
+  ja: { home: "ホーム", plugin: "プラグインのソースコード", rdv: "ランデブーサーバーのソースコード", bug: "不具合を報告", copy: "コピー", copied: "コピーしました ✓",
+        only: "この技術ページは英語とフランス語のみです。英語版を表示しています。" },
+};
+let lang = "en";
+
+function stored() { try { return localStorage.getItem("lang"); } catch { return null; } }
+function store(l) { try { localStorage.setItem("lang", l); } catch {} }
+
+// Un lien #fr force la langue ; une ancre de section (#federation) n'y touche pas.
+function detect() {
+  const hash = location.hash.slice(1).toLowerCase();
+  if (LANGS.includes(hash)) return hash;
+  const saved = stored();
+  if (LANGS.includes(saved)) return saved;
+  for (const l of navigator.languages || [navigator.language || ""]) {
+    const base = l.slice(0, 2).toLowerCase();
+    if (LANGS.includes(base)) return base;
+  }
+  return "en";
+}
+
+function apply(l) {
+  lang = l;
+  const text = l === "fr" ? "fr" : "en";
+  const root = document.documentElement;
+  root.lang = text;
+  root.dataset.l = text;
+  const c = CHROME[l];
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = c[el.dataset.i18n]; });
+  document.querySelectorAll(".copy").forEach(b => { b.textContent = c.copy; });
+  const only = document.getElementById("only");
+  only.textContent = c.only;
+  only.hidden = !c.only;
+  if (c.only) only.lang = l; else only.removeAttribute("lang");
+  document.title = text === "fr" ? "Linkpearl Sync, sous le capot" : "Linkpearl Sync, under the hood";
+  document.querySelectorAll(".langs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
+}
+
+document.querySelectorAll(".langs button").forEach(b => b.addEventListener("click", () => {
+  store(b.dataset.lang);
+  apply(b.dataset.lang);
+}));
+addEventListener("hashchange", () => {
+  const hash = location.hash.slice(1).toLowerCase();
+  if (LANGS.includes(hash)) apply(hash);
+});
+
+// Un bouton Copier par bloc de commandes. Les commentaires partent aussi :
+// le shell les ignore, et ils aident à relire ce qu'on colle.
+document.querySelectorAll("pre").forEach(pre => {
+  const code = pre.querySelector("code");
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "copy";
+  btn.addEventListener("click", () => {
+    const select = () => {
+      const range = document.createRange();
+      range.selectNodeContents(code);
+      const sel = getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    };
+    if (!navigator.clipboard) { select(); return; }
+    navigator.clipboard.writeText(code.textContent).then(() => {
+      btn.textContent = CHROME[lang].copied;
+      setTimeout(() => { btn.textContent = CHROME[lang].copy; }, 1600);
+    }, select);
+  });
+  pre.append(btn);
+});
+
+apply(detect());
+</script>
+</body>
+</html>

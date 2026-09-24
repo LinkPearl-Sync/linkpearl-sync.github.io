@@ -117,6 +117,7 @@ footer{text-align:center;color:var(--mute);font-size:.86rem;display:flex;flex-wr
 
   <footer>
     <a id="guide" href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin#getting-started" data-i18n="guide">Full guide</a>
+    <a href="expert.html" data-i18n="expert">Under the hood, self-hosting</a>
     <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin" data-i18n="src">Source code</a>
     <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/issues" data-i18n="bug">Report a problem</a>
   </footer>
@@ -141,7 +142,7 @@ const T = {
     inst: "Add the repository to Dalamud",
     how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories: paste, click <b>+</b>, then save. Then <b>/xlplugins</b> › Linkpearl Sync. Requires ${PENUMBRA} and ${GLAMOURER}.`,
     copy: "Copy", copied: "Copied ✓", selected: "Selected, press Ctrl+C",
-    guide: "Full guide", src: "Source code", bug: "Report a problem",
+    guide: "Full guide", expert: "Under the hood, self-hosting", src: "Source code", bug: "Report a problem",
   },
   fr: {
     desc: "Voyez les apparences moddées de vos amis dans Final Fantasy XIV, de joueur à joueur, sans serveur au milieu.",
@@ -156,7 +157,7 @@ const T = {
     inst: "Ajoutez le dépôt à Dalamud",
     how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories : collez, cliquez sur <b>+</b>, puis enregistrez. Ensuite <b>/xlplugins</b> › Linkpearl Sync. Requiert ${PENUMBRA} et ${GLAMOURER}.`,
     copy: "Copier", copied: "Copié ✓", selected: "Sélectionné, Ctrl+C",
-    guide: "Guide complet", src: "Code source", bug: "Signaler un problème",
+    guide: "Guide complet", expert: "Sous le capot, auto-hébergement", src: "Code source", bug: "Signaler un problème",
   },
   de: {
     desc: "Sieh die gemoddeten Looks deiner Freunde in Final Fantasy XIV, von Spieler zu Spieler, ohne Server dazwischen.",
@@ -171,7 +172,7 @@ const T = {
     inst: "Repository zu Dalamud hinzufügen",
     how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories: einfügen, auf <b>+</b> klicken, speichern. Dann <b>/xlplugins</b> › Linkpearl Sync. Benötigt ${PENUMBRA} und ${GLAMOURER}.`,
     copy: "Kopieren", copied: "Kopiert ✓", selected: "Markiert, Strg+C drücken",
-    guide: "Vollständige Anleitung (Englisch)", src: "Quellcode", bug: "Problem melden",
+    guide: "Vollständige Anleitung (Englisch)", expert: "Technik und Selbsthosting (Englisch)", src: "Quellcode", bug: "Problem melden",
   },
   ja: {
     desc: "フレンドのMod適用済みの見た目を、プレイヤー同士で直接。間にサーバーはありません。Final Fantasy XIV 用 Dalamud プラグイン。",
@@ -186,7 +187,7 @@ const T = {
     inst: "Dalamudにリポジトリを追加",
     how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories に貼り付けて <b>+</b> を押し、保存します。続いて <b>/xlplugins</b> › Linkpearl Sync。${PENUMBRA}と${GLAMOURER}が必要です。`,
     copy: "コピー", copied: "コピーしました ✓", selected: "選択済み、Ctrl+Cでコピー",
-    guide: "詳しいガイド（英語）", src: "ソースコード", bug: "不具合を報告",
+    guide: "詳しいガイド（英語）", expert: "仕組みとセルフホスト（英語）", src: "ソースコード", bug: "不具合を報告",
   },
 };
 const LANGS = Object.keys(T);

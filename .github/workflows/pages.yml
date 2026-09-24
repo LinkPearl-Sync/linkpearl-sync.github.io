@@ -61,7 +61,7 @@ jobs:
           # retirerait le plugin de la liste de tous les joueurs.
           jq -e 'type == "array" and length > 0 and all(.[]; .InternalName and .AssemblyVersion and .DownloadLinkInstall)' plugin/repo.json > /dev/null
           mkdir out
-          cp -r site/index.html site/assets site/.nojekyll out/
+          cp -r site/*.html site/assets site/.nojekyll out/
           cp plugin/repo.json out/repo.json
 
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b  # v5

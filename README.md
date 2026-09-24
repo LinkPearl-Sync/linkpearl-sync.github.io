@@ -3,8 +3,13 @@
 Page de présentation de [Linkpearl Sync](https://github.com/LinkPearl-Sync/linkpearl-sync-plugin),
 servie par GitHub Pages sur <https://linkpearl-sync.github.io/>.
 
-Une seule page statique, sans outil de construction : `index.html` et ses images dans `assets/`.
+Des pages statiques, sans outil de construction : `index.html` (l'accueil), `expert.html` (le
+fonctionnement, la fédération et le guide d'auto-hébergement) et leurs images dans `assets/`.
 Pousser sur `main` publie, par GitHub Actions.
+
+`expert.html` n'existe qu'en anglais et en français, comme les README du plugin : un texte
+technique mal traduit induirait en erreur. Elle décrit l'état du code publié ; la relire quand
+le plugin ou le rendez-vous change de comportement (connexion, relais, options de `lprdv`).
 
 - `assets/banner.png` et `assets/logo.png` sont des copies de
   `Linkpearl/Assets/Images/banner.png` et `Plugin_Logo.png` du dépôt du plugin : les recopier
