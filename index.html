@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Linkpearl Sync</title>
+<meta name="description" content="Voyez les apparences moddées de vos amis dans Final Fantasy XIV, de joueur à joueur, sans serveur au milieu.">
+<meta name="theme-color" content="#07123a">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Linkpearl Sync">
+<meta property="og:description" content="Voyez les apparences moddées de vos amis dans Final Fantasy XIV, de joueur à joueur, sans serveur au milieu.">
+<meta property="og:url" content="https://linkpearl-sync.github.io/">
+<meta property="og:image" content="https://linkpearl-sync.github.io/assets/banner.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;700;800&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Une seule ambiance, la nuit du logo : le site ne suit pas le thème clair. */
+:root{
+  color-scheme:dark;
+  --ink:#eaf1ff; --mute:#a9b8e6; --glow:#5fb4ff; --deep:#07123a; --pom:#ffa45c; --field:#040b26;
+  --display:"Fredoka","Nunito",ui-rounded,system-ui,sans-serif;
+  --body:"Nunito",ui-rounded,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--deep)}
+body{
+  margin:0;min-height:100vh;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  background:
+    radial-gradient(ellipse 70% 480px at 50% 160px,#1d3b9a 0%,transparent 70%),
+    radial-gradient(ellipse at 50% 100%,#0c1e5c 0%,var(--deep) 60%);
+  padding-inline:16px;padding-block:calc(28px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px));
+  position:relative;overflow-x:hidden;
+}
+main{max-width:880px;margin-inline:auto;display:grid;gap:32px;position:relative}
+.banner{display:block;width:100%;max-width:640px;height:auto;margin-inline:auto;filter:drop-shadow(0 0 30px rgba(95,180,255,.35))}
+h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tag{font-family:var(--display);font-weight:500;font-size:clamp(1.35rem,3.4vw,2rem);text-align:center;margin:-12px 0 0;text-wrap:balance;line-height:1.25}
+.tag em{font-style:normal;color:var(--pom)}
+.args{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0;padding:0;list-style:none}
+.args li{padding:20px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(143,196,255,.22);display:grid;gap:6px;align-content:start}
+.args h2{font-family:var(--display);font-weight:600;font-size:1.15rem;margin:0;display:flex;gap:10px;align-items:center}
+.args h2::before{content:"";width:12px;height:12px;border-radius:50%;flex:none;
+  background:radial-gradient(circle at 35% 30%,#fff 0 18%,#bfe4ff 30%,#7a9cff 60%,#c79bff 100%);box-shadow:0 0 10px #7ec3ff}
+.args p{margin:0;color:var(--mute);font-size:.96rem}
+.install{display:grid;gap:12px;justify-items:center;text-align:center}
+.install h2{font-family:var(--display);font-weight:600;margin:0;font-size:1.3rem}
+.copy{display:flex;align-items:center;gap:10px;width:100%;max-width:720px;border-radius:999px;background:var(--field);
+  border:1px solid var(--glow);box-shadow:0 0 0 4px rgba(95,180,255,.12),0 0 28px rgba(95,180,255,.25);padding:6px 6px 6px 20px}
+.copy code{font-family:var(--mono);font-size:.84rem;color:#cfe6ff;text-align:left;overflow-x:auto;white-space:nowrap;flex:1;min-width:0;scrollbar-width:thin}
+.copy button{font:inherit;font-weight:800;cursor:pointer;white-space:nowrap;background:var(--pom);color:#2a1300;border:0;border-radius:999px;padding:10px 20px}
+.copy button:hover{filter:brightness(1.08)}
+.copy button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.how{margin:0;color:var(--mute);font-size:.92rem;max-width:62ch}
+.how b{color:var(--ink);font-weight:700}
+.how a,footer a{color:var(--ink);text-decoration-color:rgba(234,241,255,.35);text-underline-offset:3px}
+.how a:hover,footer a:hover{text-decoration-color:var(--pom)}
+footer{text-align:center;color:var(--mute);font-size:.86rem;display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px}
+.star{position:absolute;color:#8fd0ff;opacity:.55;font-size:14px;animation:tw 3.6s ease-in-out infinite;pointer-events:none}
+@keyframes tw{50%{opacity:.15}}
+@media (max-width:760px){
+  .args{grid-template-columns:1fr}
+  .copy{border-radius:18px;flex-wrap:wrap;padding:12px}
+  .copy button{width:100%}
+}
+@media (prefers-reduced-motion:reduce){.star{animation:none}}
+</style>
+</head>
+<body>
+<span class="star" style="left:8%;top:120px" aria-hidden="true">✦</span>
+<span class="star" style="left:88%;top:200px;animation-delay:1.2s" aria-hidden="true">✦</span>
+<span class="star" style="left:16%;top:560px;animation-delay:2s;font-size:10px" aria-hidden="true">✦</span>
+<span class="star" style="left:82%;top:640px;animation-delay:.6s;font-size:10px" aria-hidden="true">✦</span>
+<main>
+  <header>
+    <h1>Linkpearl Sync</h1>
+    <img class="banner" src="assets/banner.png" width="1100" height="550" alt="Linkpearl : deux mogs reliés par des perles">
+  </header>
+  <p class="tag">Voyez les apparences moddées de vos amis,<br><em>de joueur à joueur</em>, sans serveur au milieu.</p>
+
+  <ul class="args">
+    <li><h2>Direct, de jeu à jeu</h2><p>Vos mods voyagent chiffrés de bout en bout. Aucun serveur ne les stocke ni ne les redistribue.</p></li>
+    <li><h2>Vos amis, personne d'autre</h2><p>Un clic droit pour demander, un clic pour accepter. Rien ne s'échange sans l'accord des deux.</p></li>
+    <li><h2>Tout votre look</h2><p>Penumbra et Glamourer, mais aussi animations, effets, sons, Customize+, Heels, Honorific, Moodles.</p></li>
+  </ul>
+
+  <section class="install">
+    <h2>Ajoutez le dépôt à Dalamud</h2>
+    <div class="copy">
+      <code id="repo">https://linkpearl-sync.github.io/repo.json</code>
+      <button type="button" id="cp">Copier</button>
+    </div>
+    <p class="how"><b>/xlsettings</b> › Experimental › Custom Plugin Repositories, collez, <b>+</b>, Enregistrer. Puis <b>/xlplugins</b> › Linkpearl Sync. Requiert <a href="https://github.com/xivdev/Penumbra">Penumbra</a> et <a href="https://github.com/Ottermandias/Glamourer">Glamourer</a>.</p>
+  </section>
+
+  <footer>
+    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin#premiers-pas">Guide complet</a>
+    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin">Code source</a>
+    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/issues">Signaler un problème</a>
+  </footer>
+</main>
+<script>
+// Hors contexte sécurisé (fichier ouvert en local), l'API presse-papiers manque :
+// on sélectionne alors l'adresse pour que Ctrl+C suffise.
+const btn = document.getElementById("cp");
+const code = document.getElementById("repo");
+function flash(text, ms) {
+  btn.textContent = text;
+  setTimeout(() => { btn.textContent = "Copier"; }, ms);
+}
+function selectOnly() {
+  const range = document.createRange();
+  range.selectNodeContents(code);
+  const sel = getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  flash("Sélectionné, Ctrl+C", 2200);
+}
+btn.addEventListener("click", () => {
+  if (!navigator.clipboard) { selectOnly(); return; }
+  navigator.clipboard.writeText(code.textContent).then(() => flash("Copié ✓", 1600), selectOnly);
+});
+</script>
+</body>
+</html>

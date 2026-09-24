@@ -1,0 +1,75 @@
+name: Publier le site
+
+# Le nom affiché de chaque exécution : sans lui, GitHub reprend le titre du
+# dernier commit, qui ne dit pas pourquoi le site a été republié.
+run-name: Publication du site (${{ github.event_name }})
+
+# repo.json n'est pas écrit ici : la publication du plugin le met à jour dans
+# son propre dépôt, qui fait foi. Le site en sert une copie, reprise à chaque
+# déploiement. Trois déclencheurs :
+#   - un push ici, pour la page elle-même ;
+#   - workflow_dispatch, que la publication du plugin appelle juste après avoir
+#     enregistré le nouveau manifeste ;
+#   - un filet horaire, si cet appel a échoué (jeton expiré, panne), pour que
+#     le site ne reste jamais durablement en retard sur le plugin.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Deux déploiements simultanés se marcheraient dessus ; le plus récent gagne.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Actions épinglées sur une empreinte de commit : une étiquette se
+    # redéplace, et ce workflow publie l'adresse que Dalamud interroge.
+    steps:
+      - name: Récupérer le site
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          path: site
+
+      # Par git et non par raw.githubusercontent.com, dont le cache servirait
+      # encore l'ancien manifeste quelques minutes après une publication.
+      - name: Récupérer le manifeste du plugin
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          repository: LinkPearl-Sync/linkpearl-sync-plugin
+          ref: main
+          path: plugin
+          sparse-checkout: repo.json
+          sparse-checkout-cone-mode: false
+
+      - name: Assembler
+        run: |
+          # Un manifeste illisible ne doit pas remplacer le bon : Dalamud
+          # retirerait le plugin de la liste de tous les joueurs.
+          jq -e 'type == "array" and length > 0 and all(.[]; .InternalName and .AssemblyVersion and .DownloadLinkInstall)' plugin/repo.json > /dev/null
+          mkdir out
+          cp -r site/index.html site/assets site/.nojekyll out/
+          cp plugin/repo.json out/repo.json
+
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b  # v5
+
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa  # v3
+        with:
+          path: out
+
+      - name: Déployer
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e  # v4
