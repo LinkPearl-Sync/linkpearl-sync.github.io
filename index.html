@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Linkpearl Sync</title>
-<meta name="description" content="Voyez les apparences moddées de vos amis dans Final Fantasy XIV, de joueur à joueur, sans serveur au milieu.">
+<meta name="description" content="See your friends' modded looks in Final Fantasy XIV, player to player, with no server in between.">
 <meta name="theme-color" content="#07123a">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Linkpearl Sync">
-<meta property="og:description" content="Voyez les apparences moddées de vos amis dans Final Fantasy XIV, de joueur à joueur, sans serveur au milieu.">
+<meta property="og:description" content="See your friends' modded looks in Final Fantasy XIV, player to player, with no server in between.">
 <meta property="og:url" content="https://linkpearl-sync.github.io/">
 <meta property="og:image" content="https://linkpearl-sync.github.io/assets/banner.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -25,6 +25,12 @@
   --body:"Nunito",ui-rounded,system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
 }
+/* Fredoka et Nunito n'ont pas de kana : en japonais, une ronde qui en a,
+   chargée seulement quand cette langue est choisie. */
+:root:lang(ja){
+  --display:"M PLUS Rounded 1c","Fredoka",ui-rounded,system-ui,sans-serif;
+  --body:"M PLUS Rounded 1c","Nunito",ui-rounded,system-ui,sans-serif;
+}
 *{box-sizing:border-box}
 html{background:var(--deep)}
 body{
@@ -32,10 +38,16 @@ body{
   background:
     radial-gradient(ellipse 70% 480px at 50% 160px,#1d3b9a 0%,transparent 70%),
     radial-gradient(ellipse at 50% 100%,#0c1e5c 0%,var(--deep) 60%);
-  padding-inline:16px;padding-block:calc(28px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px));
+  padding-inline:16px;padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px));
   position:relative;overflow-x:hidden;
 }
 main{max-width:880px;margin-inline:auto;display:grid;gap:32px;position:relative}
+header{display:grid;gap:8px}
+.langs{justify-self:end;display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:rgba(4,11,38,.6);border:1px solid rgba(143,196,255,.22)}
+.langs button{font:inherit;font-size:.84rem;font-weight:700;color:var(--mute);background:transparent;border:0;border-radius:999px;padding:5px 12px;cursor:pointer}
+.langs button:hover{color:var(--ink)}
+.langs button[aria-pressed="true"]{color:var(--ink);background:rgba(95,180,255,.18);box-shadow:0 0 0 1px var(--glow) inset}
+.langs button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .banner{display:block;width:100%;max-width:640px;height:auto;margin-inline:auto;filter:drop-shadow(0 0 30px rgba(95,180,255,.35))}
 h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .tag{font-family:var(--display);font-weight:500;font-size:clamp(1.35rem,3.4vw,2rem);text-align:center;margin:-12px 0 0;text-wrap:balance;line-height:1.25}
@@ -62,6 +74,7 @@ footer{text-align:center;color:var(--mute);font-size:.86rem;display:flex;flex-wr
 .star{position:absolute;color:#8fd0ff;opacity:.55;font-size:14px;animation:tw 3.6s ease-in-out infinite;pointer-events:none}
 @keyframes tw{50%{opacity:.15}}
 @media (max-width:760px){
+  .langs{justify-self:center}
   .args{grid-template-columns:1fr}
   .copy{border-radius:18px;flex-wrap:wrap;padding:12px}
   .copy button{width:100%}
@@ -76,40 +89,163 @@ footer{text-align:center;color:var(--mute);font-size:.86rem;display:flex;flex-wr
 <span class="star" style="left:82%;top:640px;animation-delay:.6s;font-size:10px" aria-hidden="true">✦</span>
 <main>
   <header>
+    <nav class="langs" aria-label="Language">
+      <button type="button" data-lang="ja" lang="ja">日本語</button>
+      <button type="button" data-lang="en" lang="en">English</button>
+      <button type="button" data-lang="de" lang="de">Deutsch</button>
+      <button type="button" data-lang="fr" lang="fr">Français</button>
+    </nav>
     <h1>Linkpearl Sync</h1>
-    <img class="banner" src="assets/banner.png" width="1100" height="550" alt="Linkpearl : deux mogs reliés par des perles">
+    <img class="banner" src="assets/banner.png" width="1100" height="550" alt="Linkpearl: two moogles linked by pearls" data-i18n-alt="alt">
   </header>
-  <p class="tag">Voyez les apparences moddées de vos amis,<br><em>de joueur à joueur</em>, sans serveur au milieu.</p>
+  <p class="tag" data-i18n-html="tag">See your friends' modded looks,<br><em>player to player</em>, with no server in between.</p>
 
   <ul class="args">
-    <li><h2>Direct, de jeu à jeu</h2><p>Vos mods voyagent chiffrés de bout en bout. Aucun serveur ne les stocke ni ne les redistribue.</p></li>
-    <li><h2>Vos amis, personne d'autre</h2><p>Un clic droit pour demander, un clic pour accepter. Rien ne s'échange sans l'accord des deux.</p></li>
-    <li><h2>Tout votre look</h2><p>Penumbra et Glamourer, mais aussi animations, effets, sons, Customize+, Heels, Honorific, Moodles.</p></li>
+    <li><h2 data-i18n="a1">Straight from game to game</h2><p data-i18n="a1p">Your mods travel end-to-end encrypted. No server stores or redistributes them.</p></li>
+    <li><h2 data-i18n="a2">Your friends, no one else</h2><p data-i18n="a2p">Right-click to ask, one click to accept. Nothing is shared unless you both agree.</p></li>
+    <li><h2 data-i18n="a3">Your whole look</h2><p data-i18n="a3p">Penumbra and Glamourer, plus animations, VFX, sounds, Customize+, Heels, Honorific, Moodles.</p></li>
   </ul>
 
   <section class="install">
-    <h2>Ajoutez le dépôt à Dalamud</h2>
+    <h2 data-i18n="inst">Add the repository to Dalamud</h2>
     <div class="copy">
       <code id="repo">https://linkpearl-sync.github.io/repo.json</code>
-      <button type="button" id="cp">Copier</button>
+      <button type="button" id="cp" data-i18n="copy">Copy</button>
     </div>
-    <p class="how"><b>/xlsettings</b> › Experimental › Custom Plugin Repositories, collez, <b>+</b>, Enregistrer. Puis <b>/xlplugins</b> › Linkpearl Sync. Requiert <a href="https://github.com/xivdev/Penumbra">Penumbra</a> et <a href="https://github.com/Ottermandias/Glamourer">Glamourer</a>.</p>
+    <p class="how" data-i18n-html="how"><b>/xlsettings</b> › Experimental › Custom Plugin Repositories: paste, click <b>+</b>, then save. Then <b>/xlplugins</b> › Linkpearl Sync. Requires <a href="https://github.com/xivdev/Penumbra">Penumbra</a> and <a href="https://github.com/Ottermandias/Glamourer">Glamourer</a>.</p>
   </section>
 
   <footer>
-    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin#premiers-pas">Guide complet</a>
-    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin">Code source</a>
-    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/issues">Signaler un problème</a>
+    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin#premiers-pas" data-i18n="guide">Full guide (French)</a>
+    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin" data-i18n="src">Source code</a>
+    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/issues" data-i18n="bug">Report a problem</a>
   </footer>
 </main>
 <script>
+// Les libellés de Dalamud (Experimental, Custom Plugin Repositories) restent en
+// anglais dans toutes les langues : c'est sous ces noms que les guides de la
+// communauté les désignent, quelle que soit la langue du client.
+const PENUMBRA = '<a href="https://github.com/xivdev/Penumbra">Penumbra</a>';
+const GLAMOURER = '<a href="https://github.com/Ottermandias/Glamourer">Glamourer</a>';
+const T = {
+  en: {
+    desc: "See your friends' modded looks in Final Fantasy XIV, player to player, with no server in between.",
+    alt: "Linkpearl: two moogles linked by pearls",
+    tag: "See your friends' modded looks,<br><em>player to player</em>, with no server in between.",
+    a1: "Straight from game to game",
+    a1p: "Your mods travel end-to-end encrypted. No server stores or redistributes them.",
+    a2: "Your friends, no one else",
+    a2p: "Right-click to ask, one click to accept. Nothing is shared unless you both agree.",
+    a3: "Your whole look",
+    a3p: "Penumbra and Glamourer, plus animations, VFX, sounds, Customize+, Heels, Honorific, Moodles.",
+    inst: "Add the repository to Dalamud",
+    how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories: paste, click <b>+</b>, then save. Then <b>/xlplugins</b> › Linkpearl Sync. Requires ${PENUMBRA} and ${GLAMOURER}.`,
+    copy: "Copy", copied: "Copied ✓", selected: "Selected, press Ctrl+C",
+    guide: "Full guide (French)", src: "Source code", bug: "Report a problem",
+  },
+  fr: {
+    desc: "Voyez les apparences moddées de vos amis dans Final Fantasy XIV, de joueur à joueur, sans serveur au milieu.",
+    alt: "Linkpearl : deux mogs reliés par des perles",
+    tag: "Voyez les apparences moddées de vos amis,<br><em>de joueur à joueur</em>, sans serveur au milieu.",
+    a1: "Direct, de jeu à jeu",
+    a1p: "Vos mods voyagent chiffrés de bout en bout. Aucun serveur ne les stocke ni ne les redistribue.",
+    a2: "Vos amis, personne d'autre",
+    a2p: "Un clic droit pour demander, un clic pour accepter. Rien ne s'échange sans l'accord des deux.",
+    a3: "Tout votre look",
+    a3p: "Penumbra et Glamourer, mais aussi animations, effets, sons, Customize+, Heels, Honorific, Moodles.",
+    inst: "Ajoutez le dépôt à Dalamud",
+    how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories : collez, cliquez sur <b>+</b>, puis enregistrez. Ensuite <b>/xlplugins</b> › Linkpearl Sync. Requiert ${PENUMBRA} et ${GLAMOURER}.`,
+    copy: "Copier", copied: "Copié ✓", selected: "Sélectionné, Ctrl+C",
+    guide: "Guide complet", src: "Code source", bug: "Signaler un problème",
+  },
+  de: {
+    desc: "Sieh die gemoddeten Looks deiner Freunde in Final Fantasy XIV, von Spieler zu Spieler, ohne Server dazwischen.",
+    alt: "Linkpearl: zwei Moogles, verbunden durch Perlen",
+    tag: "Sieh die gemoddeten Looks deiner Freunde,<br><em>von Spieler zu Spieler</em>, ohne Server dazwischen.",
+    a1: "Direkt von Spiel zu Spiel",
+    a1p: "Deine Mods werden Ende-zu-Ende-verschlüsselt übertragen. Kein Server speichert oder verteilt sie.",
+    a2: "Deine Freunde, sonst niemand",
+    a2p: "Rechtsklick zum Anfragen, ein Klick zum Annehmen. Ohne eure beiderseitige Zustimmung wird nichts geteilt.",
+    a3: "Dein ganzer Look",
+    a3p: "Penumbra und Glamourer, dazu Animationen, Effekte, Sounds, Customize+, Heels, Honorific, Moodles.",
+    inst: "Repository zu Dalamud hinzufügen",
+    how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories: einfügen, auf <b>+</b> klicken, speichern. Dann <b>/xlplugins</b> › Linkpearl Sync. Benötigt ${PENUMBRA} und ${GLAMOURER}.`,
+    copy: "Kopieren", copied: "Kopiert ✓", selected: "Markiert, Strg+C drücken",
+    guide: "Vollständige Anleitung (Französisch)", src: "Quellcode", bug: "Problem melden",
+  },
+  ja: {
+    desc: "フレンドのMod適用済みの見た目を、プレイヤー同士で直接。間にサーバーはありません。Final Fantasy XIV 用 Dalamud プラグイン。",
+    alt: "Linkpearl：パールでつながる二匹のモーグリ",
+    tag: "フレンドのMod適用済みの見た目を、<br><em>プレイヤー同士で直接</em>。間にサーバーはありません。",
+    a1: "ゲームからゲームへ直接",
+    a1p: "Modはエンドツーエンドで暗号化して送られます。サーバーが保存・再配布することはありません。",
+    a2: "選んだフレンドとだけ",
+    a2p: "右クリックで申請、ワンクリックで承認。お互いの同意がなければ何も共有されません。",
+    a3: "見た目をまるごと",
+    a3p: "PenumbraとGlamourerに加え、モーション、エフェクト、サウンド、Customize+、Heels、Honorific、Moodles。",
+    inst: "Dalamudにリポジトリを追加",
+    how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories に貼り付けて <b>+</b> を押し、保存します。続いて <b>/xlplugins</b> › Linkpearl Sync。${PENUMBRA}と${GLAMOURER}が必要です。`,
+    copy: "コピー", copied: "コピーしました ✓", selected: "選択済み、Ctrl+Cでコピー",
+    guide: "詳しいガイド（フランス語）", src: "ソースコード", bug: "不具合を報告",
+  },
+};
+const LANGS = Object.keys(T);
+let lang = "en";
+
+// Le stockage peut être refusé (navigation privée, cookies bloqués) :
+// la page doit alors fonctionner, simplement sans se souvenir du choix.
+function stored() { try { return localStorage.getItem("lang"); } catch { return null; } }
+function store(l) { try { localStorage.setItem("lang", l); } catch {} }
+
+// Un lien #ja force la langue, pour qu'on puisse partager la bonne version ;
+// sinon le choix déjà fait, sinon la langue du navigateur, sinon l'anglais.
+function detect() {
+  const hash = location.hash.slice(1).toLowerCase();
+  if (LANGS.includes(hash)) return hash;
+  const saved = stored();
+  if (LANGS.includes(saved)) return saved;
+  for (const l of navigator.languages || [navigator.language || ""]) {
+    const base = l.slice(0, 2).toLowerCase();
+    if (LANGS.includes(base)) return base;
+  }
+  return "en";
+}
+
+let jaFont = false;
+function apply(l) {
+  lang = l;
+  const t = T[l];
+  document.documentElement.lang = l;
+  if (l === "ja" && !jaFont) {
+    jaFont = true;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap";
+    document.head.append(link);
+  }
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t[el.dataset.i18n]; });
+  // Textes à balises : ils viennent de T ci-dessus, jamais d'une saisie.
+  document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t[el.dataset.i18nHtml]; });
+  document.querySelectorAll("[data-i18n-alt]").forEach(el => { el.alt = t[el.dataset.i18nAlt]; });
+  document.querySelector('meta[name="description"]').content = t.desc;
+  document.querySelectorAll(".langs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
+}
+
+document.querySelectorAll(".langs button").forEach(b => b.addEventListener("click", () => {
+  store(b.dataset.lang);
+  history.replaceState(null, "", "#" + b.dataset.lang);
+  apply(b.dataset.lang);
+}));
+addEventListener("hashchange", () => apply(detect()));
+apply(detect());
+
 // Hors contexte sécurisé (fichier ouvert en local), l'API presse-papiers manque :
 // on sélectionne alors l'adresse pour que Ctrl+C suffise.
 const btn = document.getElementById("cp");
 const code = document.getElementById("repo");
-function flash(text, ms) {
-  btn.textContent = text;
-  setTimeout(() => { btn.textContent = "Copier"; }, ms);
+function flash(key, ms) {
+  btn.textContent = T[lang][key];
+  setTimeout(() => { btn.textContent = T[lang].copy; }, ms);
 }
 function selectOnly() {
   const range = document.createRange();
@@ -117,11 +253,11 @@ function selectOnly() {
   const sel = getSelection();
   sel.removeAllRanges();
   sel.addRange(range);
-  flash("Sélectionné, Ctrl+C", 2200);
+  flash("selected", 2200);
 }
 btn.addEventListener("click", () => {
   if (!navigator.clipboard) { selectOnly(); return; }
-  navigator.clipboard.writeText(code.textContent).then(() => flash("Copié ✓", 1600), selectOnly);
+  navigator.clipboard.writeText(code.textContent).then(() => flash("copied", 1600), selectOnly);
 });
 </script>
 </body>

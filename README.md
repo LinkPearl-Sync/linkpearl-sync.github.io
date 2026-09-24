@@ -14,4 +14,9 @@ Pousser sur `main` publie, par GitHub Actions.
   déploiement. La publication du plugin déclenche ce workflow, et un passage horaire rattrape
   un déclenchement manqué.
 
+- La page existe dans les quatre langues du client de FFXIV (ja, en, de, fr). Les textes sont
+  dans l'objet `T` du script de `index.html` ; le HTML statique porte l'anglais, qui sert aussi
+  aux aperçus de lien. Langue retenue : `#ja` dans l'adresse, sinon le dernier choix, sinon celle
+  du navigateur, sinon l'anglais.
+
 Aperçu local : `python3 -m http.server` puis <http://localhost:8000> (sans `repo.json`).
