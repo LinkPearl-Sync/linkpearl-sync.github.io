@@ -116,7 +116,7 @@ footer{text-align:center;color:var(--mute);font-size:.86rem;display:flex;flex-wr
   </section>
 
   <footer>
-    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin#premiers-pas" data-i18n="guide">Full guide (French)</a>
+    <a id="guide" href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin#getting-started" data-i18n="guide">Full guide</a>
     <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin" data-i18n="src">Source code</a>
     <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/issues" data-i18n="bug">Report a problem</a>
   </footer>
@@ -141,7 +141,7 @@ const T = {
     inst: "Add the repository to Dalamud",
     how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories: paste, click <b>+</b>, then save. Then <b>/xlplugins</b> › Linkpearl Sync. Requires ${PENUMBRA} and ${GLAMOURER}.`,
     copy: "Copy", copied: "Copied ✓", selected: "Selected, press Ctrl+C",
-    guide: "Full guide (French)", src: "Source code", bug: "Report a problem",
+    guide: "Full guide", src: "Source code", bug: "Report a problem",
   },
   fr: {
     desc: "Voyez les apparences moddées de vos amis dans Final Fantasy XIV, de joueur à joueur, sans serveur au milieu.",
@@ -171,7 +171,7 @@ const T = {
     inst: "Repository zu Dalamud hinzufügen",
     how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories: einfügen, auf <b>+</b> klicken, speichern. Dann <b>/xlplugins</b> › Linkpearl Sync. Benötigt ${PENUMBRA} und ${GLAMOURER}.`,
     copy: "Kopieren", copied: "Kopiert ✓", selected: "Markiert, Strg+C drücken",
-    guide: "Vollständige Anleitung (Französisch)", src: "Quellcode", bug: "Problem melden",
+    guide: "Vollständige Anleitung (Englisch)", src: "Quellcode", bug: "Problem melden",
   },
   ja: {
     desc: "フレンドのMod適用済みの見た目を、プレイヤー同士で直接。間にサーバーはありません。Final Fantasy XIV 用 Dalamud プラグイン。",
@@ -186,10 +186,16 @@ const T = {
     inst: "Dalamudにリポジトリを追加",
     how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories に貼り付けて <b>+</b> を押し、保存します。続いて <b>/xlplugins</b> › Linkpearl Sync。${PENUMBRA}と${GLAMOURER}が必要です。`,
     copy: "コピー", copied: "コピーしました ✓", selected: "選択済み、Ctrl+Cでコピー",
-    guide: "詳しいガイド（フランス語）", src: "ソースコード", bug: "不具合を報告",
+    guide: "詳しいガイド（英語）", src: "ソースコード", bug: "不具合を報告",
   },
 };
 const LANGS = Object.keys(T);
+
+// Le README existe en anglais et en français : les autres langues lisent l'anglais.
+const GUIDE = {
+  fr: "https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/blob/main/README.fr.md#premiers-pas",
+  other: "https://github.com/LinkPearl-Sync/linkpearl-sync-plugin#getting-started",
+};
 let lang = "en";
 
 // Le stockage peut être refusé (navigation privée, cookies bloqués) :
@@ -228,6 +234,7 @@ function apply(l) {
   document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t[el.dataset.i18nHtml]; });
   document.querySelectorAll("[data-i18n-alt]").forEach(el => { el.alt = t[el.dataset.i18nAlt]; });
   document.querySelector('meta[name="description"]').content = t.desc;
+  document.getElementById("guide").href = GUIDE[l] || GUIDE.other;
   document.querySelectorAll(".langs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
 }
 
