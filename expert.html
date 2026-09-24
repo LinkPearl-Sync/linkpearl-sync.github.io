@@ -182,11 +182,11 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       </figure>
       <ol>
         <li><strong>Discovery.</strong> Each plugin opens a mailbox on the rendezvous. Its address is computed from the character's name and world: <code>SHA-256("linkpearl:mbox:v1" ‖ name@world ‖ window)</code>, truncated. Anyone who sees your character can compute it; that is how the orange glyph appears next to players who use Linkpearl.</li>
-        <li><strong>Pairing.</strong> A request lands in the target's mailbox. They accept in game, and each side stores the other's public key in its local peer book. Nobody ever has to see a key.</li>
-        <li><strong>Connection.</strong> Every ten minutes, both sides announce a ticket derived from a secret only the pair shares: <code>HMAC-SHA256(secret, "lp:rv:v1" ‖ ⌊unix / 600⌋)</code>. When two announcements match, the service swaps the two addresses. The address lists are sealed under a key derived from that same secret, so the service can't read them. The plugins then try each other's addresses in priority order (local network, then the public address the service observed) and punch through the NAT.</li>
+        <li><strong>Pairing.</strong> A request lands in the target's mailbox. They accept in game, and each side stores the other's public key in its local peer book. Nobody ever has to see a key. Request and reply each carry a one-time key: the secret the pair shares comes from their exchange, so the service that carried them cannot compute it.</li>
+        <li><strong>Connection.</strong> Every ten minutes, both sides announce a ticket derived from a secret only the pair shares: <code>HMAC-SHA256(secret, "linkpearl:rv:v1" ‖ ⌊unix / 600⌋)</code>. When two announcements match, the service swaps the two addresses. The address lists are sealed under a key derived from that same secret, so the service can't read them. The plugins then try each other's addresses in priority order (local network, then the public address the service observed) and punch through the NAT.</li>
       </ol>
-      <p><strong>When no direct path exists</strong> (some strict NATs), the rendezvous service can relay the session, which stays end-to-end encrypted: it only sees sealed bytes. The service already supports it; the plugin is being wired to use it. Until then, such a pair can't connect.</p>
-      <p>A direct connection shows your IP address to your peer, as in any peer-to-peer game or voice chat. Only people you paired with ever get it.</p>
+      <p><strong>When no direct path exists</strong> (some strict NATs), the session goes through the relay of the service that introduced you, still end-to-end encrypted: it only sees sealed bytes. Your peers list shows whether each session is direct or relayed.</p>
+      <p>A direct connection shows your IP address to your peer, as in any peer-to-peer game or voice chat. Only people you paired with ever get it. A session relayed after a failed direct attempt does not hide it either: the addresses were exchanged during the attempt.</p>
     </div>
     <div data-v="fr">
       <h2>Comment deux joueurs se connectent</h2>
@@ -212,11 +212,11 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       </figure>
       <ol>
         <li><strong>Détection.</strong> Chaque plugin ouvre une boîte aux lettres sur le rendez-vous. Son adresse se calcule depuis le nom et le monde du personnage : <code>SHA-256("linkpearl:mbox:v1" ‖ nom@monde ‖ fenêtre)</code>, tronqué. Quiconque voit votre personnage peut la calculer ; c'est ainsi que le glyphe orange apparaît à côté des joueurs qui utilisent Linkpearl.</li>
-        <li><strong>Pairage.</strong> Une demande arrive dans la boîte de la cible. Elle accepte en jeu, et chacun range la clé publique de l'autre dans son carnet local. Personne n'a jamais à voir une clé.</li>
-        <li><strong>Connexion.</strong> Toutes les dix minutes, chacun annonce un ticket dérivé d'un secret que seule la paire connaît : <code>HMAC-SHA256(secret, "lp:rv:v1" ‖ ⌊unix / 600⌋)</code>. Quand deux annonces correspondent, le service échange les deux adresses. Les listes d'adresses sont scellées sous une clé dérivée de ce même secret, donc le service ne peut pas les lire. Les plugins essaient alors les adresses de l'autre par ordre de priorité (réseau local, puis l'adresse publique que le service a observée) et percent le NAT.</li>
+        <li><strong>Pairage.</strong> Une demande arrive dans la boîte de la cible. Elle accepte en jeu, et chacun range la clé publique de l'autre dans son carnet local. Personne n'a jamais à voir une clé. La demande et la réponse portent chacune une clé à usage unique : le secret que partage la paire vient de leur accord, et le service qui les a transportées ne peut pas le calculer.</li>
+        <li><strong>Connexion.</strong> Toutes les dix minutes, chacun annonce un ticket dérivé d'un secret que seule la paire connaît : <code>HMAC-SHA256(secret, "linkpearl:rv:v1" ‖ ⌊unix / 600⌋)</code>. Quand deux annonces correspondent, le service échange les deux adresses. Les listes d'adresses sont scellées sous une clé dérivée de ce même secret, donc le service ne peut pas les lire. Les plugins essaient alors les adresses de l'autre par ordre de priorité (réseau local, puis l'adresse publique que le service a observée) et percent le NAT.</li>
       </ol>
-      <p><strong>Quand aucun chemin direct n'existe</strong> (certains NAT stricts), le service de rendez-vous peut relayer la session, qui reste chiffrée de bout en bout : il ne voit que des octets scellés. Le service le sait déjà ; le plugin est en train d'être branché dessus. D'ici là, une telle paire ne peut pas se connecter.</p>
-      <p>Une connexion directe montre votre adresse IP à votre pair, comme tout jeu ou chat vocal en pair à pair. Seules les personnes avec qui vous vous êtes pairé l'obtiennent.</p>
+      <p><strong>Quand aucun chemin direct n'existe</strong> (certains NAT stricts), la session passe par le relais du service qui vous a mis en relation, toujours chiffrée de bout en bout : il ne voit que des octets scellés. Votre liste de pairs indique si chaque session est directe ou relayée.</p>
+      <p>Une connexion directe montre votre adresse IP à votre pair, comme tout jeu ou chat vocal en pair à pair. Seules les personnes avec qui vous vous êtes pairé l'obtiennent. Une session relayée après un essai direct raté ne la cache pas non plus : les adresses ont été échangées pendant l'essai.</p>
     </div>
   </section>
 
@@ -237,11 +237,11 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       </table></div>
       <ul>
         <li><strong>One identity per character</strong>, generated on your PC. The private key never leaves it, except inside the backup file you choose to make.</li>
-        <li><strong>SIGMA-I handshake</strong>: mutual authentication over a transcript that includes both ephemeral keys, and forward secrecy. Stealing an identity key later does not decrypt past sessions. A 60-second timestamp window blocks replays.</li>
-        <li><strong>Authorization comes from your local peer book only.</strong> The received public key must already be there as accepted, and it is checked before any cryptographic work.</li>
+        <li><strong>SIGMA-I handshake</strong>: mutual authentication over a transcript that includes both ephemeral keys, and forward secrecy. Stealing an identity key later does not decrypt past sessions. Both sides contribute fresh one-time keys, so a replayed handshake leads nowhere.</li>
+        <li><strong>Authorization comes from your local peer book only.</strong> The received public key must be exactly the one stored for that peer, and it is checked before any cryptographic work.</li>
         <li><strong>Data channel</strong>: each message is sealed with AES-256-GCM. The nonce carries the channel index, so two channels can never reuse one, and counters only advance after authentication.</li>
       </ul>
-      <p class="note"><strong>Not reviewed yet.</strong> The handshake is a custom construction and no outside cryptographer has reviewed it. It is written up in <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/blob/main/docs/protocol.md">docs/protocol.md</a> (French) precisely so it can be. If this is your field, a review is very welcome.</p>
+      <p class="note"><strong>A custom construction.</strong> The full protocol, its trust model and its known limits are written up in <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/blob/main/docs/protocol.md">docs/protocol.md</a> (French).</p>
     </div>
     <div data-v="fr">
       <h2>Chiffrement</h2>
@@ -256,11 +256,11 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       </table></div>
       <ul>
         <li><strong>Une identité par personnage</strong>, engendrée sur votre PC. La clé privée ne le quitte jamais, sauf dans le fichier de sauvegarde que vous choisissez de faire.</li>
-        <li><strong>Handshake SIGMA-I</strong> : authentification mutuelle sur un transcript qui contient les deux clés éphémères, et confidentialité persistante. Voler une clé d'identité plus tard ne déchiffre pas les sessions passées. Une fenêtre de 60 secondes sur l'horodatage bloque les rejeux.</li>
-        <li><strong>L'autorisation vient de votre seul carnet local.</strong> La clé publique reçue doit déjà y figurer comme acceptée, et elle est comparée avant tout travail cryptographique.</li>
+        <li><strong>Handshake SIGMA-I</strong> : authentification mutuelle sur un transcript qui contient les deux clés éphémères, et confidentialité persistante. Voler une clé d'identité plus tard ne déchiffre pas les sessions passées. Chaque côté apporte des clés neuves à usage unique, donc un handshake rejoué ne mène nulle part.</li>
+        <li><strong>L'autorisation vient de votre seul carnet local.</strong> La clé publique reçue doit être exactement celle rangée pour ce pair, et elle est comparée avant tout travail cryptographique.</li>
         <li><strong>Canal de données</strong> : chaque message est scellé en AES-256-GCM. Le nonce porte l'index du canal, donc deux canaux ne peuvent jamais en réutiliser un, et les compteurs n'avancent qu'après authentification.</li>
       </ul>
-      <p class="note"><strong>Pas encore relu.</strong> Le handshake est une construction maison, qu'aucun cryptographe extérieur n'a relue. Il est décrit dans <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/blob/main/docs/protocol.md">docs/protocol.md</a> justement pour pouvoir l'être. Si c'est votre domaine, une relecture est la bienvenue.</p>
+      <p class="note"><strong>Une construction maison.</strong> Le protocole complet, son modèle de confiance et ses limites connues sont décrits dans <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/blob/main/docs/protocol.md">docs/protocol.md</a>.</p>
     </div>
   </section>
 
@@ -309,24 +309,26 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       <div class="tbl"><table>
         <tr><th>It sees</th><th>It never sees</th></tr>
         <tr><td>IP addresses</td><td>Your files and appearances</td></tr>
-        <tr><td>Which characters are online, if they are discoverable</td><td>Manifests, keys, the content of requests</td></tr>
+        <tr><td>Which characters are online, if they are discoverable</td><td>Manifests, private keys, the secret each pair shares</td></tr>
+        <tr><td>Pairing requests: name, world and public keys</td><td>Sessions, direct or relayed: only sealed bytes</td></tr>
         <tr><td>That two tickets match in a ten-minute window</td><td>What peers exchange once connected</td></tr>
       </table></div>
       <p><strong>Being discoverable means being discoverable.</strong> For a stranger to recognise you in game, your mailbox address has to derive from your name, and FFXIV names can be enumerated. So the operator of a service can tell which characters are online. You can opt out with <span class="ui">Me signaler aux autres joueurs</span> (let other players see me) in <span class="ui">Réglages › Visibilité</span>; then nobody can spot you or send you a request.</p>
       <p>What a service keeps: nothing about usage. Mailboxes, tickets and pending requests live in memory and vanish on restart. By default its log says what happens, never to whom: no IP addresses, no ticket fragments.</p>
-      <p><strong>A rendezvous is not an authority.</strong> It can make a connection fail; it cannot read your files or pass itself off as a peer you already paired with. One caveat, stated plainly: a pairing request goes through the target's mailbox, so a malicious operator could slip in at that moment. That is why the choice of services matters, and why a circle running its own is the strongest setup: the operator is one of you.</p>
+      <p><strong>A rendezvous is not an authority.</strong> It can make a connection fail; it cannot read your files or pass itself off as a peer you already paired with. One caveat, stated plainly: a pairing request goes through the target's mailbox, so a malicious operator could slip in at that moment, without either of you noticing. That is why the choice of services matters, and why a circle running its own is the strongest setup: the operator is one of you.</p>
     </div>
     <div data-v="fr">
       <h2>Ce que voit un service de rendez-vous</h2>
       <div class="tbl"><table>
         <tr><th>Il voit</th><th>Il ne voit jamais</th></tr>
         <tr><td>Les adresses IP</td><td>Vos fichiers et vos apparences</td></tr>
-        <tr><td>Quels personnages sont en ligne, s'ils sont détectables</td><td>Les manifestes, les clés, le contenu des demandes</td></tr>
+        <tr><td>Quels personnages sont en ligne, s'ils sont détectables</td><td>Les manifestes, les clés privées, le secret que partage chaque paire</td></tr>
+        <tr><td>Les demandes de pairage : nom, monde et clés publiques</td><td>Les sessions, directes ou relayées : seulement des octets scellés</td></tr>
         <tr><td>Que deux tickets correspondent dans une fenêtre de dix minutes</td><td>Ce que les pairs échangent une fois connectés</td></tr>
       </table></div>
       <p><strong>Être détectable, c'est être détectable.</strong> Pour qu'un inconnu vous reconnaisse en jeu, l'adresse de votre boîte doit dériver de votre nom, et les noms de FFXIV s'énumèrent. L'opérateur d'un service peut donc savoir quels personnages sont en ligne. Vous pouvez vous en retirer avec <span class="ui">Me signaler aux autres joueurs</span> dans <span class="ui">Réglages › Visibilité</span> ; personne ne peut alors vous repérer ni vous envoyer de demande.</p>
       <p>Ce qu'un service conserve : rien de l'usage. Boîtes, tickets et demandes en attente vivent en mémoire et disparaissent au redémarrage. Par défaut, son journal dit ce qui se passe, jamais à qui : ni adresse IP, ni fragment de ticket.</p>
-      <p><strong>Un rendez-vous n'est pas une autorité.</strong> Il peut faire échouer une connexion ; il ne peut ni lire vos fichiers ni se faire passer pour un pair déjà établi. Une réserve, dite franchement : une demande de pairage passe par la boîte de la cible, donc un opérateur malveillant pourrait s'intercaler à ce moment-là. C'est pourquoi le choix des services compte, et pourquoi un cercle qui fait tourner le sien est la configuration la plus sûre : l'opérateur est l'un des vôtres.</p>
+      <p><strong>Un rendez-vous n'est pas une autorité.</strong> Il peut faire échouer une connexion ; il ne peut ni lire vos fichiers ni se faire passer pour un pair déjà établi. Une réserve, dite franchement : une demande de pairage passe par la boîte de la cible, donc un opérateur malveillant pourrait s'intercaler à ce moment-là, sans que ni l'un ni l'autre ne s'en aperçoive. C'est pourquoi le choix des services compte, et pourquoi un cercle qui fait tourner le sien est la configuration la plus sûre : l'opérateur est l'un des vôtres.</p>
     </div>
   </section>
 
@@ -414,7 +416,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       <h2>Host your own rendezvous</h2>
       <p>The service is one self-contained binary, <code>lprdv</code>. It needs no .NET runtime and no database.</p>
       <p><strong>You need</strong> a Linux x86-64 server with a public IP address and systemd (a small VPS is enough; the provided unit caps the service at 512 MB of RAM), SSH access with sudo, and one port open in both <strong>TCP and UDP</strong>, 47900 by default.</p>
-      <p><strong>Bandwidth</strong>: introducing peers costs almost nothing. Relaying is what costs: once the plugin uses the relay, two players who can't connect directly will send their whole appearance, often hundreds of megabytes, through your server.</p>
+      <p><strong>Bandwidth</strong>: introducing peers costs almost nothing. Relaying is what costs: two players who can't connect directly send their whole appearance, often hundreds of megabytes, through your server.</p>
       <ol class="steps">
         <li>
           <h3>Install the service</h3>
@@ -479,7 +481,7 @@ sudo systemctl restart lprdv</code></pre>
       <h2>Héberger votre propre rendez-vous</h2>
       <p>Le service est un seul binaire autonome, <code>lprdv</code>. Il n'a besoin ni du runtime .NET ni de base de données.</p>
       <p><strong>Il vous faut</strong> un serveur Linux x86-64 avec une adresse IP publique et systemd (un petit VPS suffit ; l'unité fournie plafonne le service à 512 Mo de mémoire), un accès SSH avec sudo, et un port ouvert en <strong>TCP et en UDP</strong>, 47900 par défaut.</p>
-      <p><strong>La bande passante</strong> : mettre les pairs en relation ne coûte presque rien. C'est le relais qui coûte : dès que le plugin s'en servira, deux joueurs qui ne peuvent pas se connecter directement feront passer toute leur apparence, souvent des centaines de mégaoctets, par votre serveur.</p>
+      <p><strong>La bande passante</strong> : mettre les pairs en relation ne coûte presque rien. C'est le relais qui coûte : deux joueurs qui ne peuvent pas se connecter directement font passer toute leur apparence, souvent des centaines de mégaoctets, par votre serveur.</p>
       <ol class="steps">
         <li>
           <h3>Installer le service</h3>
