@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Linkpearl Sync</title>
-<meta name="description" content="See your friends' modded looks in Final Fantasy XIV, player to player, with no server in between.">
+<meta name="description" content="See your friends' modded looks in Final Fantasy XIV. Player to player, end-to-end encrypted: no server can read or keep your mods.">
 <meta name="theme-color" content="#07123a">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Linkpearl Sync">
-<meta property="og:description" content="See your friends' modded looks in Final Fantasy XIV, player to player, with no server in between.">
+<meta property="og:description" content="See your friends' modded looks in Final Fantasy XIV. Player to player, end-to-end encrypted: no server can read or keep your mods.">
 <meta property="og:url" content="https://linkpearl-sync.github.io/">
 <meta property="og:image" content="https://linkpearl-sync.github.io/assets/banner.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -50,8 +50,17 @@ header{display:grid;gap:8px}
 .langs button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .banner{display:block;width:100%;max-width:640px;height:auto;margin-inline:auto;filter:drop-shadow(0 0 30px rgba(95,180,255,.35))}
 h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.tag{font-family:var(--display);font-weight:500;font-size:clamp(1.35rem,3.4vw,2rem);text-align:center;margin:-12px 0 0;text-wrap:balance;line-height:1.25}
+.hero{display:grid;gap:14px;justify-items:center;text-align:center;margin-top:-12px}
+.tag{font-family:var(--display);font-weight:500;font-size:clamp(1.5rem,3.8vw,2.2rem);margin:0;text-wrap:balance;line-height:1.2}
 .tag em{font-style:normal;color:var(--pom)}
+.sub{margin:0;color:var(--mute);font-size:1.02rem;max-width:56ch;text-wrap:balance}
+.proofs{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:4px 0 0;padding:0;list-style:none}
+.proofs li{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;font-size:.86rem;font-weight:700;
+  background:rgba(95,180,255,.08);border:1px solid rgba(143,196,255,.3)}
+.proofs li::before{content:"✓";color:var(--glow);font-weight:800}
+.priv{font-size:.9rem;font-weight:700;color:var(--ink);text-decoration-color:rgba(234,241,255,.35);text-underline-offset:3px}
+.priv:hover{text-decoration-color:var(--pom)}
+.priv:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}
 .args{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0;padding:0;list-style:none}
 .args li{padding:20px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(143,196,255,.22);display:grid;gap:6px;align-content:start}
 .args h2{font-family:var(--display);font-weight:600;font-size:1.15rem;margin:0;display:flex;gap:10px;align-items:center}
@@ -98,11 +107,21 @@ footer{text-align:center;color:var(--mute);font-size:.86rem;display:flex;flex-wr
     <h1>Linkpearl Sync</h1>
     <img class="banner" src="assets/banner.png" width="1100" height="550" alt="Linkpearl: two moogles linked by pearls" data-i18n-alt="alt">
   </header>
-  <p class="tag" data-i18n-html="tag">See your friends' modded looks,<br><em>player to player</em>, with no server in between.</p>
+  <section class="hero">
+    <p class="tag" data-i18n-html="tag">Your friends see your look.<br><em>No one else does.</em></p>
+    <p class="sub" data-i18n="sub">Your mods go straight from your game to theirs, end-to-end encrypted: no server can read or keep them.</p>
+    <ul class="proofs">
+      <li data-i18n="p1">End-to-end encrypted</li>
+      <li data-i18n="p2">No files stored on a server</li>
+      <li data-i18n="p3">No account</li>
+      <li data-i18n="p4">Open source, self-hostable</li>
+    </ul>
+    <a class="priv" href="expert.html#privacy" data-i18n="priv">What servers can and cannot see ›</a>
+  </section>
 
   <ul class="args">
-    <li><h2 data-i18n="a1">Straight from game to game</h2><p data-i18n="a1p">Your mods travel end-to-end encrypted. No server stores or redistributes them.</p></li>
-    <li><h2 data-i18n="a2">Your friends, no one else</h2><p data-i18n="a2p">Right-click to ask, one click to accept. Nothing is shared unless you both agree.</p></li>
+    <li><h2 data-i18n="a1">Straight from game to game</h2><p data-i18n="a1p">Your game talks directly to your friend's. When that's impossible, a relay passes along bytes it cannot read.</p></li>
+    <li><h2 data-i18n="a2">You choose who</h2><p data-i18n="a2p">Right-click to ask, one click to accept. Nothing is shared unless you both agree.</p></li>
     <li><h2 data-i18n="a3">Your whole look</h2><p data-i18n="a3p">Penumbra and Glamourer, plus animations, VFX, sounds, Customize+, Heels, Honorific, Moodles.</p></li>
   </ul>
 
@@ -131,12 +150,15 @@ const PENUMBRA = '<a href="https://github.com/xivdev/Penumbra">Penumbra</a>';
 const GLAMOURER = '<a href="https://github.com/Ottermandias/Glamourer">Glamourer</a>';
 const T = {
   en: {
-    desc: "See your friends' modded looks in Final Fantasy XIV, player to player, with no server in between.",
+    desc: "See your friends' modded looks in Final Fantasy XIV. Player to player, end-to-end encrypted: no server can read or keep your mods.",
     alt: "Linkpearl: two moogles linked by pearls",
-    tag: "See your friends' modded looks,<br><em>player to player</em>, with no server in between.",
+    tag: "Your friends see your look.<br><em>No one else does.</em>",
+    sub: "Your mods go straight from your game to theirs, end-to-end encrypted: no server can read or keep them.",
+    p1: "End-to-end encrypted", p2: "No files stored on a server", p3: "No account", p4: "Open source, self-hostable",
+    priv: "What servers can and cannot see ›",
     a1: "Straight from game to game",
-    a1p: "Your mods travel end-to-end encrypted. No server stores or redistributes them.",
-    a2: "Your friends, no one else",
+    a1p: "Your game talks directly to your friend's. When that's impossible, a relay passes along bytes it cannot read.",
+    a2: "You choose who",
     a2p: "Right-click to ask, one click to accept. Nothing is shared unless you both agree.",
     a3: "Your whole look",
     a3p: "Penumbra and Glamourer, plus animations, VFX, sounds, Customize+, Heels, Honorific, Moodles.",
@@ -146,12 +168,15 @@ const T = {
     guide: "Full guide", expert: "Under the hood, self-hosting", roadmap: "Roadmap", src: "Source code", bug: "Report a problem",
   },
   fr: {
-    desc: "Voyez les apparences moddées de vos amis dans Final Fantasy XIV, de joueur à joueur, sans serveur au milieu.",
+    desc: "Voyez les apparences moddées de vos amis dans Final Fantasy XIV. De joueur à joueur, chiffré de bout en bout : aucun serveur ne peut lire ni garder vos mods.",
     alt: "Linkpearl : deux mogs reliés par des perles",
-    tag: "Voyez les apparences moddées de vos amis,<br><em>de joueur à joueur</em>, sans serveur au milieu.",
+    tag: "Vos amis voient votre look.<br><em>Personne d'autre.</em>",
+    sub: "Vos mods passent directement de votre jeu au leur, chiffrés de bout en bout : aucun serveur ne peut les lire ni les garder.",
+    p1: "Chiffré de bout en bout", p2: "Aucun fichier stocké sur un serveur", p3: "Sans compte", p4: "Code ouvert, auto-hébergeable",
+    priv: "Ce que les serveurs voient, et ne voient pas ›",
     a1: "Direct, de jeu à jeu",
-    a1p: "Vos mods voyagent chiffrés de bout en bout. Aucun serveur ne les stocke ni ne les redistribue.",
-    a2: "Vos amis, personne d'autre",
+    a1p: "Votre jeu parle directement à celui de votre ami. Quand c'est impossible, un relais transmet des octets qu'il ne peut pas lire.",
+    a2: "Vous choisissez qui",
     a2p: "Un clic droit pour demander, un clic pour accepter. Rien ne s'échange sans l'accord des deux.",
     a3: "Tout votre look",
     a3p: "Penumbra et Glamourer, mais aussi animations, effets, sons, Customize+, Heels, Honorific, Moodles.",
@@ -161,12 +186,15 @@ const T = {
     guide: "Guide complet", expert: "Sous le capot, auto-hébergement", roadmap: "Feuille de route", src: "Code source", bug: "Signaler un problème",
   },
   de: {
-    desc: "Sieh die gemoddeten Looks deiner Freunde in Final Fantasy XIV, von Spieler zu Spieler, ohne Server dazwischen.",
+    desc: "Sieh die gemoddeten Looks deiner Freunde in Final Fantasy XIV. Von Spieler zu Spieler, Ende-zu-Ende-verschlüsselt: Kein Server kann deine Mods lesen oder behalten.",
     alt: "Linkpearl: zwei Moogles, verbunden durch Perlen",
-    tag: "Sieh die gemoddeten Looks deiner Freunde,<br><em>von Spieler zu Spieler</em>, ohne Server dazwischen.",
+    tag: "Deine Freunde sehen deinen Look.<br><em>Sonst niemand.</em>",
+    sub: "Deine Mods gehen direkt von deinem Spiel zu ihrem, Ende-zu-Ende-verschlüsselt: Kein Server kann sie lesen oder behalten.",
+    p1: "Ende-zu-Ende-verschlüsselt", p2: "Keine Dateien auf Servern gespeichert", p3: "Kein Konto", p4: "Open Source, selbst hostbar",
+    priv: "Was Server sehen und was nicht (Englisch) ›",
     a1: "Direkt von Spiel zu Spiel",
-    a1p: "Deine Mods werden Ende-zu-Ende-verschlüsselt übertragen. Kein Server speichert oder verteilt sie.",
-    a2: "Deine Freunde, sonst niemand",
+    a1p: "Dein Spiel spricht direkt mit dem deines Freundes. Geht das nicht, reicht ein Relay Bytes weiter, die es nicht lesen kann.",
+    a2: "Du entscheidest, mit wem",
     a2p: "Rechtsklick zum Anfragen, ein Klick zum Annehmen. Ohne eure beiderseitige Zustimmung wird nichts geteilt.",
     a3: "Dein ganzer Look",
     a3p: "Penumbra und Glamourer, dazu Animationen, Effekte, Sounds, Customize+, Heels, Honorific, Moodles.",
@@ -176,12 +204,15 @@ const T = {
     guide: "Vollständige Anleitung (Englisch)", expert: "Technik und Selbsthosting (Englisch)", roadmap: "Roadmap (Englisch)", src: "Quellcode", bug: "Problem melden",
   },
   ja: {
-    desc: "フレンドのMod適用済みの見た目を、プレイヤー同士で直接。間にサーバーはありません。Final Fantasy XIV 用 Dalamud プラグイン。",
+    desc: "フレンドのMod適用済みの見た目を、プレイヤー同士で直接。エンドツーエンドで暗号化され、サーバーがModを読むことも保存することもできません。Final Fantasy XIV 用 Dalamud プラグイン。",
     alt: "Linkpearl：パールでつながる二匹のモーグリ",
-    tag: "フレンドのMod適用済みの見た目を、<br><em>プレイヤー同士で直接</em>。間にサーバーはありません。",
+    tag: "あなたの見た目は、フレンドだけに。<br><em>ほかの誰にも届きません。</em>",
+    sub: "Modはあなたのゲームから相手のゲームへ直接、エンドツーエンドで暗号化して届きます。サーバーが読むことも保存することもできません。",
+    p1: "エンドツーエンド暗号化", p2: "サーバーにファイルを保存しない", p3: "アカウント不要", p4: "オープンソース・セルフホスト可",
+    priv: "サーバーから見えるもの・見えないもの（英語） ›",
     a1: "ゲームからゲームへ直接",
-    a1p: "Modはエンドツーエンドで暗号化して送られます。サーバーが保存・再配布することはありません。",
-    a2: "選んだフレンドとだけ",
+    a1p: "あなたのゲームがフレンドのゲームと直接つながります。直接つながれない場合も、中継サーバーは中身を読めないデータを受け渡すだけです。",
+    a2: "相手はあなたが選ぶ",
     a2p: "右クリックで申請、ワンクリックで承認。お互いの同意がなければ何も共有されません。",
     a3: "見た目をまるごと",
     a3p: "PenumbraとGlamourerに加え、モーション、エフェクト、サウンド、Customize+、Heels、Honorific、Moodles。",
