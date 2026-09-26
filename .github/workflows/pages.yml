@@ -63,6 +63,8 @@ jobs:
           mkdir out
           cp -r site/*.html site/assets site/.nojekyll out/
           cp plugin/repo.json out/repo.json
+          # L'instantané public du réseau ; en panne, le dernier publié.
+          python3 site/scripts/reseau.py out/reseau.json
 
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b  # v5
 
