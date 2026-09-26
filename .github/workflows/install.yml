@@ -46,6 +46,9 @@ jobs:
           systemctl show lprdv -p ExecStart --value | grep -q -- '--no-announce'
           # Le port suit l'adresse, sans quoi elle se lirait sur 47900.
           systemctl show lprdv -p ExecStart --value | grep -q -- '--public-address rdv.essai.invalid:47910'
+          # Le libellé à espaces doit arriver en un seul argument : l'affichage
+          # de systemd ne le montre pas, la ligne de commande du processus oui.
+          sudo tr '\0' '\n' < "/proc/$(systemctl show -p MainPID --value lprdv)/cmdline" | grep -qx "Essai de l'intégration"
           ss -ltn | grep -q ':47910 '
           sudo test -s /var/lib/lprdv/admin.token
 
