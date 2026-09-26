@@ -104,6 +104,12 @@ td.num,th.num{font-variant-numeric:tabular-nums;text-align:right;white-space:now
 .pcard .facts{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px;color:var(--mute);font-size:.9rem}
 .pcard .facts .below{color:var(--pom);font-weight:700}
 
+.anchor{display:grid;gap:12px}
+.acard{display:grid;gap:8px;padding:14px 18px;border-radius:18px;border:1px dashed var(--line);background:rgba(4,11,38,.35)}
+.acard .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.acard .label{font-weight:800}
+.acard .addr{font-family:var(--mono);font-size:.84rem;color:#cfe6ff;overflow-wrap:anywhere}
+.acard p{color:var(--mute);font-size:.95rem}
 .join{display:grid;gap:12px;padding:18px 20px;border-radius:18px;border:1px solid rgba(255,164,92,.35);background:rgba(255,164,92,.06)}
 .join ul{margin:0;padding-left:1.3em;display:grid;gap:6px}
 pre{position:relative;margin:0;padding:14px 16px;padding-right:86px;border-radius:14px;background:var(--field);border:1px solid rgba(95,180,255,.45);
@@ -184,6 +190,27 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
         <thead><tr><th data-t="label">Name</th><th data-t="address">Address</th><th data-t="since">Listed since</th><th class="num" data-t="availability">Last 24 h</th></tr></thead>
         <tbody id="listed-rows"></tbody>
       </table>
+    </div>
+  </section>
+
+  <!-- Écrit à la main, pas tiré de reseau.json : l'autorité ne connaît que le
+       cercle ouvert. Recopier RendezvousList.DefaultHost si le plugin change. -->
+  <section id="anchor">
+    <div data-v="en" class="anchor">
+      <h2>The anchor circle</h2>
+      <div class="acard">
+        <div class="head"><span class="label">Linkpearl</span><span class="addr">rdv.linkpearl.eorzea.events:47900</span></div>
+        <p>Shipped with the plugin, and the one every first contact goes through: it is not in the open circle, on purpose. A service in both circles could pair a client with itself. It also runs the authority that signs the open circle's list.</p>
+      </div>
+      <p class="small">Services you add yourself in the plugin settings belong to your anchor circle too, and never show up here.</p>
+    </div>
+    <div data-v="fr" class="anchor">
+      <h2>Le cercle d'ancrage</h2>
+      <div class="acard">
+        <div class="head"><span class="label">Linkpearl</span><span class="addr">rdv.linkpearl.eorzea.events:47900</span></div>
+        <p>Distribué avec le plugin, c'est par lui que passent tous les premiers contacts : il n'est pas dans le cercle ouvert, et c'est voulu. Un service présent dans les deux cercles pourrait apparier un client avec lui-même. C'est aussi lui qui tient l'autorité qui signe la liste du cercle ouvert.</p>
+      </div>
+      <p class="small">Les services ajoutés à la main dans les réglages du plugin font eux aussi partie du cercle d'ancrage, et n'apparaissent jamais ici.</p>
     </div>
   </section>
 
