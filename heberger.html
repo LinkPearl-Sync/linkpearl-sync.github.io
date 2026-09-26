@@ -175,7 +175,7 @@ const TEXT = {
     after: "Running the same command again updates the service; run the full command again to change an option. /var/lib/lprdv is never touched.",
     readScript: "Read the script", manual: "Step by step instead", network: "The open circle",
     badAddress: "A name or an IPv4 address, optionally followed by :port.",
-    badLabel: "No quote, backslash, $, % or backtick.",
+    badLabel: "At most 64 bytes (an accented letter counts as two), no quote, backslash, $, % or backtick.",
     badPort: "Between 1 and 65535, except 47901 (the console).",
   },
   fr: {
@@ -188,7 +188,7 @@ const TEXT = {
     after: "Relancer la même commande met le service à jour ; relancer la commande complète pour changer une option. /var/lib/lprdv n'est jamais touché.",
     readScript: "Lire le script", manual: "Pas à pas plutôt", network: "Le cercle ouvert",
     badAddress: "Un nom ou une adresse IPv4, éventuellement suivi de :port.",
-    badLabel: "Sans guillemet, barre oblique inverse, $, % ni accent grave.",
+    badLabel: "64 octets au plus (une lettre accentuée en compte deux), sans guillemet, barre oblique inverse, $, % ni accent grave.",
     badPort: "Entre 1 et 65535, sauf 47901 (la console).",
   },
 };
@@ -218,7 +218,8 @@ const text = () => TEXT[lang === "fr" ? "fr" : "en"];
 // que le script refuserait.
 const checks = {
   address: v => v === "" || /^[A-Za-z0-9._-]{1,253}(:[0-9]{1,5})?$/.test(v),
-  label: v => v.length <= 64 && !/["\\$%`\u0000-\u001f\u007f]/.test(v),
+  // 64 octets UTF-8, la borne du protocole, et non 64 caractères.
+  label: v => new TextEncoder().encode(v).length <= 64 && !/["\\$%`\u0000-\u001f\u007f]/.test(v),
   port: v => /^[0-9]+$/.test(v) && +v >= 1 && +v <= 65535 && +v !== 47901,
 };
 

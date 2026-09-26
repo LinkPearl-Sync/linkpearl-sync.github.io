@@ -6,7 +6,7 @@
 #   --port N               port TCP et UDP (47900 par défaut)
 #   --public-address NOM   nom ou IPv4 sous lequel les autres le joignent ;
 #                          sans lui, l'autorité retient l'IPv4 de la candidature
-#   --label TEXTE          nom affiché dans les annuaires
+#   --label TEXTE          nom affiché dans les annuaires (64 octets au plus)
 #   --no-announce          ne pas se porter candidat au cercle ouvert
 #   --no-firewall          ne pas toucher au pare-feu
 #   --no-auto-update       ne pas se mettre à jour seul (lprdv-update.timer)
@@ -65,7 +65,9 @@ fi
 # interprète là (" \ $ % et l'accent grave) et les caractères de contrôle.
 # Les lettres accentuées passent, quelle que soit la locale de sudo.
 if [ -n "$label" ]; then
-  [ "${#label}" -le 64 ] || die "libellé trop long : 64 caractères au plus"
+  # 64 octets UTF-8, la borne du protocole : au-delà, chaque candidature
+  # échouerait en silence. Compté en octets quelle que soit la locale de sudo.
+  [ "$(printf '%s' "$label" | LC_ALL=C wc -c)" -le 64 ] || die "libellé trop long : 64 octets au plus (une lettre accentuée en compte deux)"
   case "$label" in
     *[\"\\\$%\`]*|*[[:cntrl:]]*) die "libellé invalide : sans guillemet, barre oblique inverse, \$, % ni accent grave" ;;
   esac
