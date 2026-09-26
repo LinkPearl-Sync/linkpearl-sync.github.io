@@ -43,7 +43,7 @@ body{
 }
 main{max-width:880px;margin-inline:auto;display:grid;gap:32px;position:relative}
 header{display:grid;gap:8px}
-.langs{justify-self:end;display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:rgba(4,11,38,.6);border:1px solid rgba(143,196,255,.22)}
+.langs{justify-self:center;display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:rgba(4,11,38,.6);border:1px solid rgba(143,196,255,.22)}
 .langs button{font:inherit;font-size:.84rem;font-weight:700;color:var(--mute);background:transparent;border:0;border-radius:999px;padding:5px 12px;cursor:pointer}
 .langs button:hover{color:var(--ink)}
 .langs button[aria-pressed="true"]{color:var(--ink);background:rgba(95,180,255,.18);box-shadow:0 0 0 1px var(--glow) inset}
@@ -53,7 +53,6 @@ h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);whi
 .hero{display:grid;gap:14px;justify-items:center;text-align:center;margin-top:-12px}
 .tag{font-family:var(--display);font-weight:500;font-size:clamp(1.5rem,3.8vw,2.2rem);margin:0;text-wrap:balance;line-height:1.2}
 .tag em{font-style:normal;color:var(--pom)}
-.sub{margin:0;color:var(--mute);font-size:1.02rem;max-width:56ch;text-wrap:balance}
 .proofs{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:4px 0 0;padding:0;list-style:none}
 .proofs li{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;font-size:.86rem;font-weight:700;
   background:rgba(95,180,255,.08);border:1px solid rgba(143,196,255,.3)}
@@ -61,12 +60,25 @@ h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);whi
 .priv{font-size:.9rem;font-weight:700;color:var(--ink);text-decoration-color:rgba(234,241,255,.35);text-underline-offset:3px}
 .priv:hover{text-decoration-color:var(--pom)}
 .priv:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}
-.args{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0;padding:0;list-style:none}
+.args{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:0;padding:0;list-style:none}
 .args li{padding:20px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(143,196,255,.22);display:grid;gap:6px;align-content:start}
 .args h2{font-family:var(--display);font-weight:600;font-size:1.15rem;margin:0;display:flex;gap:10px;align-items:center}
 .args h2::before{content:"";width:12px;height:12px;border-radius:50%;flex:none;
   background:radial-gradient(circle at 35% 30%,#fff 0 18%,#bfe4ff 30%,#7a9cff 60%,#c79bff 100%);box-shadow:0 0 10px #7ec3ff}
-.args p{margin:0;color:var(--mute);font-size:.96rem}
+.args p{margin:0;color:var(--mute);font-size:.96rem;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+.cmp{display:grid;gap:12px}
+.cmp h2{font-family:var(--display);font-weight:600;margin:0;font-size:1.3rem;text-align:center}
+.cmp table{width:100%;border-collapse:separate;border-spacing:0;border-radius:18px;overflow:hidden;
+  background:rgba(255,255,255,.05);border:1px solid rgba(143,196,255,.22);font-size:.94rem}
+.cmp th,.cmp td{padding:12px 16px;text-align:left;vertical-align:top}
+.cmp tbody tr+tr>*{border-top:1px solid rgba(143,196,255,.14)}
+.cmp thead th{font-family:var(--display);font-weight:600;font-size:1rem;background:rgba(4,11,38,.5)}
+.cmp thead td{background:rgba(4,11,38,.5)}
+.cmp thead th:last-child{color:var(--glow)}
+.cmp tbody th{font-weight:800;width:24%}
+.cmp .m{color:var(--mute)}
+.cmp .l{background:rgba(95,180,255,.07)}
+.cmp .l:not(.con)::before{content:"✓ ";color:var(--glow);font-weight:800}
 .install{display:grid;gap:12px;justify-items:center;text-align:center}
 .install h2{font-family:var(--display);font-weight:600;margin:0;font-size:1.3rem}
 .copy{display:flex;align-items:center;gap:10px;width:100%;max-width:720px;border-radius:999px;background:var(--field);
@@ -83,9 +95,17 @@ footer{text-align:center;color:var(--mute);font-size:.86rem;display:flex;flex-wr
 .star{position:absolute;color:#8fd0ff;opacity:.55;font-size:14px;animation:tw 3.6s ease-in-out infinite;pointer-events:none}
 @keyframes tw{50%{opacity:.15}}
 @media (max-width:760px){
-  .langs{justify-self:center}
   .args{grid-template-columns:1fr}
   .copy{border-radius:18px;flex-wrap:wrap;padding:12px}
+  .cmp thead{display:none}
+  .cmp tbody tr{display:grid}
+  .cmp tbody th,.cmp tbody td{width:auto;padding:8px 16px}
+  .cmp tbody tr+tr>td{border-top:0}
+  .cmp tbody th{padding-top:14px}
+  .cmp tbody td:last-child{padding-bottom:14px}
+  .cmp .m::before{content:attr(data-h);font-weight:700}
+  .cmp .l{background:none}
+  .cmp .l::before,.cmp .l:not(.con)::before{content:attr(data-h);color:var(--glow);font-weight:700}
   .copy button{width:100%}
 }
 @media (prefers-reduced-motion:reduce){.star{animation:none}}
@@ -99,17 +119,16 @@ footer{text-align:center;color:var(--mute);font-size:.86rem;display:flex;flex-wr
 <main>
   <header>
     <nav class="langs" aria-label="Language">
-      <button type="button" data-lang="ja" lang="ja">日本語</button>
+      <button type="button" data-lang="fr" lang="fr">Français</button>
       <button type="button" data-lang="en" lang="en">English</button>
       <button type="button" data-lang="de" lang="de">Deutsch</button>
-      <button type="button" data-lang="fr" lang="fr">Français</button>
+      <button type="button" data-lang="ja" lang="ja">日本語</button>
     </nav>
     <h1>Linkpearl Sync</h1>
     <img class="banner" src="assets/banner.png" width="1100" height="550" alt="Linkpearl: two moogles linked by pearls" data-i18n-alt="alt">
   </header>
   <section class="hero">
     <p class="tag" data-i18n-html="tag">Your friends see your look.<br><em>No one else does.</em></p>
-    <p class="sub" data-i18n="sub">Your mods go straight from your game to theirs, end-to-end encrypted: no server can read or keep them.</p>
     <ul class="proofs">
       <li data-i18n="p1">End-to-end encrypted</li>
       <li data-i18n="p2">No files stored on a server</li>
@@ -119,12 +138,6 @@ footer{text-align:center;color:var(--mute);font-size:.86rem;display:flex;flex-wr
     <a class="priv" href="expert.html#privacy" data-i18n="priv">What servers can and cannot see ›</a>
   </section>
 
-  <ul class="args">
-    <li><h2 data-i18n="a1">Straight from game to game</h2><p data-i18n="a1p">Your game talks directly to your friend's. When that's impossible, a relay passes along bytes it cannot read.</p></li>
-    <li><h2 data-i18n="a2">You choose who</h2><p data-i18n="a2p">Right-click to ask, one click to accept. Nothing is shared unless you both agree.</p></li>
-    <li><h2 data-i18n="a3">Your whole look</h2><p data-i18n="a3p">Penumbra and Glamourer, plus animations, VFX, sounds, Customize+, Heels, Honorific, Moodles.</p></li>
-  </ul>
-
   <section class="install">
     <h2 data-i18n="inst">Add the repository to Dalamud</h2>
     <div class="copy">
@@ -132,6 +145,25 @@ footer{text-align:center;color:var(--mute);font-size:.86rem;display:flex;flex-wr
       <button type="button" id="cp" data-i18n="copy">Copy</button>
     </div>
     <p class="how" data-i18n-html="how"><b>/xlsettings</b> › Experimental › Custom Plugin Repositories: paste, click <b>+</b>, then save. Then <b>/xlplugins</b> › Linkpearl Sync. Requires <a href="https://github.com/xivdev/Penumbra">Penumbra</a> and <a href="https://github.com/Ottermandias/Glamourer">Glamourer</a>.</p>
+  </section>
+
+  <ul class="args">
+    <li><h2 data-i18n="a2">You choose who</h2><p data-i18n="a2p">Right-click to ask, one click to accept.</p></li>
+    <li><h2 data-i18n="a3">Your whole look</h2><p data-i18n="a3p">Penumbra and Glamourer, plus animations, VFX, sounds, Customize+, Heels, Honorific, Moodles.</p></li>
+  </ul>
+
+  <section class="cmp">
+    <h2 data-i18n="cmp">Compared with a Mare-style sync</h2>
+    <table>
+      <thead><tr><td></td><th scope="col" data-i18n="colM">Mare-style sync</th><th scope="col" data-i18n="colL">Linkpearl Sync</th></tr></thead>
+      <tbody>
+        <tr><th scope="row" data-i18n="r1">Your mods</th><td class="m" data-i18n="m1">Stored on their server</td><td class="l" data-i18n="l1">Straight to your friend, never stored</td></tr>
+        <tr><th scope="row" data-i18n="r2">Who can read them</th><td class="m" data-i18n="m2">The server operator</td><td class="l" data-i18n="l2">Only your friend</td></tr>
+        <tr><th scope="row" data-i18n="r3">Account</th><td class="m" data-i18n="m3">Required</td><td class="l" data-i18n="l3">None</td></tr>
+        <tr><th scope="row" data-i18n="r4">If the service closes</th><td class="m" data-i18n="m4">Everything stops</td><td class="l" data-i18n="l4">Switch services, stay paired</td></tr>
+        <tr><th scope="row" data-i18n="r5">First load</th><td class="m" data-i18n="m5">Fast, served by the server</td><td class="l con" data-i18n="l5">Depends on your friend's connection</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <footer>
@@ -153,15 +185,18 @@ const T = {
     desc: "See your friends' modded looks in Final Fantasy XIV. Player to player, end-to-end encrypted: no server can read or keep your mods.",
     alt: "Linkpearl: two moogles linked by pearls",
     tag: "Your friends see your look.<br><em>No one else does.</em>",
-    sub: "Your mods go straight from your game to theirs, end-to-end encrypted: no server can read or keep them.",
     p1: "End-to-end encrypted", p2: "No files stored on a server", p3: "No account", p4: "Open source, self-hostable",
     priv: "What servers can and cannot see ›",
-    a1: "Straight from game to game",
-    a1p: "Your game talks directly to your friend's. When that's impossible, a relay passes along bytes it cannot read.",
     a2: "You choose who",
-    a2p: "Right-click to ask, one click to accept. Nothing is shared unless you both agree.",
+    a2p: "Right-click to ask, one click to accept.",
     a3: "Your whole look",
     a3p: "Penumbra and Glamourer, plus animations, VFX, sounds, Customize+, Heels, Honorific, Moodles.",
+    cmp: "Compared with a Mare-style sync", colM: "Mare-style sync", colL: "Linkpearl Sync",
+    r1: "Your mods", m1: "Stored on their server", l1: "Straight to your friend, never stored",
+    r2: "Who can read them", m2: "The server operator", l2: "Only your friend",
+    r3: "Account", m3: "Required", l3: "None",
+    r4: "If the service closes", m4: "Everything stops", l4: "Switch services, stay paired",
+    r5: "First load", m5: "Fast, served by the server", l5: "Depends on your friend's connection",
     inst: "Add the repository to Dalamud",
     how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories: paste, click <b>+</b>, then save. Then <b>/xlplugins</b> › Linkpearl Sync. Requires ${PENUMBRA} and ${GLAMOURER}.`,
     copy: "Copy", copied: "Copied ✓", selected: "Selected, press Ctrl+C",
@@ -171,15 +206,18 @@ const T = {
     desc: "Voyez les apparences moddées de vos amis dans Final Fantasy XIV. De joueur à joueur, chiffré de bout en bout : aucun serveur ne peut lire ni garder vos mods.",
     alt: "Linkpearl : deux mogs reliés par des perles",
     tag: "Vos amis voient votre look.<br><em>Personne d'autre.</em>",
-    sub: "Vos mods passent directement de votre jeu au leur, chiffrés de bout en bout : aucun serveur ne peut les lire ni les garder.",
     p1: "Chiffré de bout en bout", p2: "Aucun fichier stocké sur un serveur", p3: "Sans compte", p4: "Code ouvert, auto-hébergeable",
     priv: "Ce que les serveurs voient, et ne voient pas ›",
-    a1: "Direct, de jeu à jeu",
-    a1p: "Votre jeu parle directement à celui de votre ami. Quand c'est impossible, un relais transmet des octets qu'il ne peut pas lire.",
     a2: "Vous choisissez qui",
-    a2p: "Un clic droit pour demander, un clic pour accepter. Rien ne s'échange sans l'accord des deux.",
+    a2p: "Un clic droit pour demander, un clic pour accepter.",
     a3: "Tout votre look",
     a3p: "Penumbra et Glamourer, mais aussi animations, effets, sons, Customize+, Heels, Honorific, Moodles.",
+    cmp: "Face à une synchro type Mare", colM: "Synchro type Mare", colL: "Linkpearl Sync",
+    r1: "Vos mods", m1: "Stockés sur leur serveur", l1: "Direct à votre ami, jamais stockés",
+    r2: "Qui peut les lire", m2: "L'opérateur du serveur", l2: "Votre ami seulement",
+    r3: "Compte", m3: "Obligatoire", l3: "Aucun",
+    r4: "Si le service ferme", m4: "Tout s'arrête", l4: "On change de service, sans se re‑pairer",
+    r5: "Premier chargement", m5: "Rapide, servi par le serveur", l5: "Selon la connexion de votre ami",
     inst: "Ajoutez le dépôt à Dalamud",
     how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories : collez, cliquez sur <b>+</b>, puis enregistrez. Ensuite <b>/xlplugins</b> › Linkpearl Sync. Requiert ${PENUMBRA} et ${GLAMOURER}.`,
     copy: "Copier", copied: "Copié ✓", selected: "Sélectionné, Ctrl+C",
@@ -189,15 +227,18 @@ const T = {
     desc: "Sieh die gemoddeten Looks deiner Freunde in Final Fantasy XIV. Von Spieler zu Spieler, Ende-zu-Ende-verschlüsselt: Kein Server kann deine Mods lesen oder behalten.",
     alt: "Linkpearl: zwei Moogles, verbunden durch Perlen",
     tag: "Deine Freunde sehen deinen Look.<br><em>Sonst niemand.</em>",
-    sub: "Deine Mods gehen direkt von deinem Spiel zu ihrem, Ende-zu-Ende-verschlüsselt: Kein Server kann sie lesen oder behalten.",
     p1: "Ende-zu-Ende-verschlüsselt", p2: "Keine Dateien auf Servern gespeichert", p3: "Kein Konto", p4: "Open Source, selbst hostbar",
     priv: "Was Server sehen und was nicht (Englisch) ›",
-    a1: "Direkt von Spiel zu Spiel",
-    a1p: "Dein Spiel spricht direkt mit dem deines Freundes. Geht das nicht, reicht ein Relay Bytes weiter, die es nicht lesen kann.",
     a2: "Du entscheidest, mit wem",
-    a2p: "Rechtsklick zum Anfragen, ein Klick zum Annehmen. Ohne eure beiderseitige Zustimmung wird nichts geteilt.",
+    a2p: "Rechtsklick zum Anfragen, ein Klick zum Annehmen.",
     a3: "Dein ganzer Look",
     a3p: "Penumbra und Glamourer, dazu Animationen, Effekte, Sounds, Customize+, Heels, Honorific, Moodles.",
+    cmp: "Im Vergleich zu einem Sync wie Mare", colM: "Sync wie Mare", colL: "Linkpearl Sync",
+    r1: "Deine Mods", m1: "Auf ihrem Server gespeichert", l1: "Direkt zu deinem Freund, nie gespeichert",
+    r2: "Wer sie lesen kann", m2: "Der Serverbetreiber", l2: "Nur dein Freund",
+    r3: "Konto", m3: "Pflicht", l3: "Keins",
+    r4: "Wenn der Dienst schließt", m4: "Alles steht still", l4: "Dienst wechseln, ohne neu zu koppeln",
+    r5: "Erstes Laden", m5: "Schnell, vom Server geliefert", l5: "Je nach Verbindung deines Freundes",
     inst: "Repository zu Dalamud hinzufügen",
     how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories: einfügen, auf <b>+</b> klicken, speichern. Dann <b>/xlplugins</b> › Linkpearl Sync. Benötigt ${PENUMBRA} und ${GLAMOURER}.`,
     copy: "Kopieren", copied: "Kopiert ✓", selected: "Markiert, Strg+C drücken",
@@ -207,15 +248,18 @@ const T = {
     desc: "フレンドのMod適用済みの見た目を、プレイヤー同士で直接。エンドツーエンドで暗号化され、サーバーがModを読むことも保存することもできません。Final Fantasy XIV 用 Dalamud プラグイン。",
     alt: "Linkpearl：パールでつながる二匹のモーグリ",
     tag: "あなたの見た目は、フレンドだけに。<br><em>ほかの誰にも届きません。</em>",
-    sub: "Modはあなたのゲームから相手のゲームへ直接、エンドツーエンドで暗号化して届きます。サーバーが読むことも保存することもできません。",
     p1: "エンドツーエンド暗号化", p2: "サーバーにファイルを保存しない", p3: "アカウント不要", p4: "オープンソース・セルフホスト可",
     priv: "サーバーから見えるもの・見えないもの（英語） ›",
-    a1: "ゲームからゲームへ直接",
-    a1p: "あなたのゲームがフレンドのゲームと直接つながります。直接つながれない場合も、中継サーバーは中身を読めないデータを受け渡すだけです。",
     a2: "相手はあなたが選ぶ",
-    a2p: "右クリックで申請、ワンクリックで承認。お互いの同意がなければ何も共有されません。",
+    a2p: "右クリックで申請、ワンクリックで承認。",
     a3: "見た目をまるごと",
     a3p: "PenumbraとGlamourerに加え、モーション、エフェクト、サウンド、Customize+、Heels、Honorific、Moodles。",
+    cmp: "Mare型の同期との違い", colM: "Mare型の同期", colL: "Linkpearl Sync",
+    r1: "Mod", m1: "サーバーに保存", l1: "フレンドへ直接、保存なし",
+    r2: "読める人", m2: "サーバーの運営者", l2: "フレンドだけ",
+    r3: "アカウント", m3: "必要", l3: "不要",
+    r4: "サービス終了時", m4: "すべて止まる", l4: "別のサービスへ移ればそのまま",
+    r5: "初回の読み込み", m5: "速い（サーバーから配信）", l5: "フレンドの回線しだい",
     inst: "Dalamudにリポジトリを追加",
     how: `<b>/xlsettings</b> › Experimental › Custom Plugin Repositories に貼り付けて <b>+</b> を押し、保存します。続いて <b>/xlplugins</b> › Linkpearl Sync。${PENUMBRA}と${GLAMOURER}が必要です。`,
     copy: "コピー", copied: "コピーしました ✓", selected: "選択済み、Ctrl+Cでコピー",
@@ -265,6 +309,10 @@ function apply(l) {
   document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t[el.dataset.i18n]; });
   // Textes à balises : ils viennent de T ci-dessus, jamais d'une saisie.
   document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t[el.dataset.i18nHtml]; });
+  // En mobile, le tableau passe en fiches : chaque cellule rappelle sa colonne.
+  const colon = { fr: " : ", ja: "：" }[l] || ": ";
+  document.querySelectorAll(".cmp .m").forEach(el => { el.dataset.h = t.colM + colon; });
+  document.querySelectorAll(".cmp .l").forEach(el => { el.dataset.h = "Linkpearl" + colon; });
   document.querySelectorAll("[data-i18n-alt]").forEach(el => { el.alt = t[el.dataset.i18nAlt]; });
   document.querySelector('meta[name="description"]').content = t.desc;
   document.getElementById("guide").href = GUIDE[l] || GUIDE.other;
