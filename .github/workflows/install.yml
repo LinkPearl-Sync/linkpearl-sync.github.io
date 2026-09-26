@@ -34,6 +34,8 @@ jobs:
             if sudo bash install.sh $bad; then echo "accepté à tort : $bad"; exit 1; fi
           done
           if sudo bash install.sh --label 'a$(id)'; then echo 'libellé accepté à tort'; exit 1; fi
+          # 64 octets UTF-8, comme le protocole : 40 « é » en font 80.
+          if sudo bash install.sh --label "$(printf 'é%.0s' $(seq 40))"; then echo 'libellé trop long accepté'; exit 1; fi
           test ! -e /opt/lprdv/lprdv
 
       - name: Première installation
