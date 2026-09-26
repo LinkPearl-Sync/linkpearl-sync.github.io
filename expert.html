@@ -309,12 +309,13 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       <div class="tbl"><table>
         <tr><th><span aria-hidden="true">✅</span> It sees</th><th><span aria-hidden="true">🚫</span> It never sees</th></tr>
         <tr><td>IP addresses</td><td>Your files and appearances</td></tr>
-        <tr><td>Which characters are online, if they are discoverable</td><td>Manifests, private keys, the secret each pair shares</td></tr>
+        <tr><td>Which characters are online, if they are discoverable</td><td>Manifests and private keys</td></tr>
+        <tr><td>Who is paired with whom: pairing requests and IP addresses give it away</td><td>The secret each pair shares</td></tr>
         <tr><td>Pairing requests: name, world and public keys</td><td>Sessions, direct or relayed: only sealed bytes</td></tr>
         <tr><td>That two tickets match in a ten-minute window</td><td>What peers exchange once connected</td></tr>
       </table></div>
       <p><strong>Being discoverable means being discoverable.</strong> For a stranger to recognise you in game, your mailbox address has to derive from your name, and FFXIV names can be enumerated. So the operator of a service can tell which characters are online. You can opt out with <span class="ui">Me signaler aux autres joueurs</span> (let other players see me) in <span class="ui">Réglages › Visibilité</span>; then nobody can spot you or send you a request.</p>
-      <p>What a service keeps: nothing about usage. Mailboxes, tickets and pending requests live in memory and vanish on restart. By default its log says what happens, never to whom: no IP addresses, no ticket fragments.</p>
+      <p><strong>What a service keeps: nothing on disk, and little for long in memory.</strong> A pairing request is never stored: it is delivered at once, or dropped if the target is not connected. A mailbox exists only while your game is connected, an announcement lives ten minutes at most, an invitation twenty-four hours and vanishes as soon as it is used. Your IP address is kept only for the length of the connection. By default the log says what happens, never to whom: no IP addresses, no names. It goes to the host's system journal, whose retention the operator sets.</p>
       <p><strong>A rendezvous is not an authority.</strong> It can make a connection fail; it cannot read your files or pass itself off as a peer you already paired with. One caveat, stated plainly: a pairing request goes through the target's mailbox, so a malicious operator could slip in at that moment, without either of you noticing. That is why the choice of services matters, and why a circle running its own is the strongest setup: the operator is one of you.</p>
     </div>
     <div data-v="fr">
@@ -322,12 +323,13 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       <div class="tbl"><table>
         <tr><th><span aria-hidden="true">✅</span> Il voit</th><th><span aria-hidden="true">🚫</span> Il ne voit jamais</th></tr>
         <tr><td>Les adresses IP</td><td>Vos fichiers et vos apparences</td></tr>
-        <tr><td>Quels personnages sont en ligne, s'ils sont détectables</td><td>Les manifestes, les clés privées, le secret que partage chaque paire</td></tr>
+        <tr><td>Quels personnages sont en ligne, s'ils sont détectables</td><td>Les manifestes et les clés privées</td></tr>
+        <tr><td>Qui est pairé avec qui : les demandes de pairage et les adresses IP le trahissent</td><td>Le secret que partage chaque paire</td></tr>
         <tr><td>Les demandes de pairage : nom, monde et clés publiques</td><td>Les sessions, directes ou relayées : seulement des octets scellés</td></tr>
         <tr><td>Que deux tickets correspondent dans une fenêtre de dix minutes</td><td>Ce que les pairs échangent une fois connectés</td></tr>
       </table></div>
       <p><strong>Être détectable, c'est être détectable.</strong> Pour qu'un inconnu vous reconnaisse en jeu, l'adresse de votre boîte doit dériver de votre nom, et les noms de FFXIV s'énumèrent. L'opérateur d'un service peut donc savoir quels personnages sont en ligne. Vous pouvez vous en retirer avec <span class="ui">Me signaler aux autres joueurs</span> dans <span class="ui">Réglages › Visibilité</span> ; personne ne peut alors vous repérer ni vous envoyer de demande.</p>
-      <p>Ce qu'un service conserve : rien de l'usage. Boîtes, tickets et demandes en attente vivent en mémoire et disparaissent au redémarrage. Par défaut, son journal dit ce qui se passe, jamais à qui : ni adresse IP, ni fragment de ticket.</p>
+      <p><strong>Ce qu'un service conserve : rien sur disque, et peu de temps en mémoire.</strong> Une demande de pairage n'est jamais stockée : elle est remise aussitôt, ou abandonnée si la cible n'est pas connectée. Une boîte n'existe que tant que votre jeu est connecté, une annonce vit dix minutes au plus, une invitation vingt-quatre heures et disparaît dès qu'elle sert. Votre adresse IP n'est gardée que le temps de la connexion. Par défaut, le journal dit ce qui se passe, jamais à qui : ni adresse IP, ni nom. Il part dans le journal système de l'hébergeur, dont l'opérateur règle la durée de conservation.</p>
       <p><strong>Un rendez-vous n'est pas une autorité.</strong> Il peut faire échouer une connexion ; il ne peut ni lire vos fichiers ni se faire passer pour un pair déjà établi. Une réserve, dite franchement : une demande de pairage passe par la boîte de la cible, donc un opérateur malveillant pourrait s'intercaler à ce moment-là, sans que ni l'un ni l'autre ne s'en aperçoive. C'est pourquoi le choix des services compte, et pourquoi un cercle qui fait tourner le sien est la configuration la plus sûre : l'opérateur est l'un des vôtres.</p>
     </div>
   </section>
