@@ -51,6 +51,10 @@ jobs:
           sudo tr '\0' '\n' < "/proc/$(systemctl show -p MainPID --value lprdv)/cmdline" | grep -qx "Essai de l'intégration"
           ss -ltn | grep -q ':47910 '
           sudo test -s /var/lib/lprdv/admin.token
+          systemctl is-enabled lprdv-update.timer
+          # La version tout juste installée est la dernière : la ronde doit le dire.
+          sudo /opt/lprdv/lprdv update | tee update.txt
+          grep -q 'à jour' update.txt
 
       - name: Relancé sans option, il met à jour et garde tout
         run: |
@@ -60,6 +64,14 @@ jobs:
           grep -q ':47910' out.txt
           systemctl show lprdv -p ExecStart --value | grep -q -- '--port 47910'
           test "$token" = "$(sudo cat /var/lib/lprdv/admin.token)"
+
+      - name: Sans mise à jour automatique, le minuteur est coupé et le reste
+        # Une commande niée ne fait pas échouer bash -e : on teste par if.
+        run: |
+          sudo bash install.sh --no-auto-update --no-firewall
+          if systemctl is-enabled --quiet lprdv-update.timer; then echo "minuteur encore actif"; exit 1; fi
+          sudo bash install.sh --no-firewall
+          if systemctl is-enabled --quiet lprdv-update.timer; then echo "minuteur réactivé à tort"; exit 1; fi
 
       - name: Journal en cas d'échec
         if: failure()
