@@ -10,6 +10,7 @@
 #   --no-announce          ne pas se porter candidat au cercle ouvert
 #   --no-firewall          ne pas toucher au pare-feu
 #   --no-auto-update       ne pas se mettre à jour seul (lprdv-update.timer)
+#   --auto-update          la rallumer après un --no-auto-update
 #
 # Rejouable : relancé sans option de configuration, il met à jour le binaire
 # et l'unité et garde les options déjà posées. Il ne touche jamais à
@@ -42,7 +43,10 @@ while [ $# -gt 0 ]; do
     --label) label="${2:-}"; configured=1; shift 2 ;;
     --no-announce) announce=0; configured=1; shift ;;
     --no-firewall) firewall=0; shift ;;
-    --no-auto-update) auto_update=0; configured=1; shift ;;
+    # Le minuteur est indépendant des options du service : le couper ne doit
+    # pas réécrire le complément avec les valeurs par défaut.
+    --no-auto-update) auto_update=0; shift ;;
+    --auto-update) auto_update=1; shift ;;
     *) die "option inconnue : $1 (voir https://linkpearl-sync.github.io/heberger.html)" ;;
   esac
 done
@@ -92,6 +96,11 @@ done
 (cd "$work" && sha256sum --quiet -c lprdv.sha256) || die "somme de contrôle incorrecte, rien n'a été installé"
 
 say "Installation"
+# Relevé avant de poser les unités : un minuteur présent et coupé est un choix
+# de l'opérateur ; absent, c'est une installation d'avant la mise à jour
+# automatique, qui la reçoit active comme une installation neuve.
+had_timer=0
+if [ -f /etc/systemd/system/lprdv-update.timer ]; then had_timer=1; fi
 id lprdv >/dev/null 2>&1 || useradd --system --home-dir /var/lib/lprdv --shell /usr/sbin/nologin lprdv
 install -d -m 0755 /opt/lprdv
 # Posé par renommage : le binaire en cours reste intact jusqu'au redémarrage.
@@ -102,7 +111,7 @@ install -m 0644 "$work/lprdv-update.service" /etc/systemd/system/lprdv-update.se
 install -m 0644 "$work/lprdv-update.timer" /etc/systemd/system/lprdv-update.timer
 # Sans option, on garde le choix déjà fait ; au premier passage, actif.
 if [ -z "$auto_update" ]; then
-  if [ "$configured" -eq 0 ] && [ -f "$DROPIN" ] && ! systemctl is-enabled --quiet lprdv-update.timer; then
+  if [ "$configured" -eq 0 ] && [ "$had_timer" -eq 1 ] && ! systemctl is-enabled --quiet lprdv-update.timer; then
     auto_update=0
   else
     auto_update=1

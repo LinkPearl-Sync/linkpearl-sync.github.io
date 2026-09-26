@@ -251,7 +251,9 @@ function build() {
   if (label) args.push("--label", quote(label));
   if (!$("announce").checked) args.push("--no-announce");
   if (!$("firewall").checked) args.push("--no-firewall");
-  if (!$("autoupdate").checked) args.push("--no-auto-update");
+  // Explicite dans les deux sens : relancer la commande rallume aussi une
+  // mise à jour coupée auparavant, au lieu de garder l'ancien choix.
+  args.push($("autoupdate").checked ? "--auto-update" : "--no-auto-update");
 
   const command = `curl -fsSL ${SCRIPT} | sudo bash` + (args.length ? ` -s -- ${args.join(" ")}` : "");
   const valid = !Object.values(errors).some(Boolean);
