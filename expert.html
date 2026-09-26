@@ -55,11 +55,17 @@ html[data-l="fr"] [data-v="en"]{display:none}
 .hero{display:grid;gap:14px}
 h1{font-family:var(--display);font-weight:600;font-size:clamp(2rem,6vw,3rem);line-height:1.1;margin:0;text-wrap:balance}
 h1 em{font-style:normal;color:var(--glow);text-shadow:0 0 22px rgba(95,180,255,.55)}
-.lead{margin:0;color:var(--mute);font-size:1.08rem;max-width:62ch}
-.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
-.toc a{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;font-size:.9rem;font-weight:700}
-.toc a::before{content:"";width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 18%,#bfe4ff 30%,#7a9cff 60%,#c79bff 100%);box-shadow:0 0 8px #7ec3ff}
-.toc a:hover{border-color:var(--glow)}
+.lead{margin:0;color:var(--mute);font-size:1.08rem}
+.toc{display:grid;gap:10px;padding:18px 20px;border-radius:18px;border:1px solid var(--line);background:var(--card)}
+.toc-h{font-family:var(--display);font-weight:600;font-size:1.05rem;color:var(--mute)}
+.toc ul{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 16px}
+.toc a{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;padding:8px 10px;margin-inline:-10px;border-radius:12px;color:var(--ink);text-decoration:none}
+.toc a::before{content:"";width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 18%,#bfe4ff 30%,#7a9cff 60%,#c79bff 100%);box-shadow:0 0 8px #7ec3ff}
+.toc .t{font-weight:800}
+.toc .d{grid-column:2;color:var(--mute);font-size:.88rem}
+.toc a:hover{background:rgba(95,180,255,.1)}
+.toc a:hover .t{color:var(--glow)}
+.toc a:focus-visible{outline:2px solid var(--ink);outline-offset:0}
 .toc a.host::before{background:radial-gradient(circle at 35% 30%,#fff5ea 0 15%,#ffc58f 40%,#ff9344 85%);box-shadow:0 0 8px rgba(255,160,90,.8)}
 
 section{display:grid;gap:14px;scroll-margin-top:20px}
@@ -69,14 +75,16 @@ h2::before{content:"";width:16px;height:16px;flex:none;border-radius:50%;backgro
 #self-host h2::before{background:radial-gradient(circle at 35% 30%,#fff5ea 0 14%,#ffc58f 40%,#ff9344 85%);box-shadow:0 0 12px rgba(255,160,90,.8)}
 h3{font-family:var(--display);font-weight:600;font-size:1.15rem;margin:0}
 p{margin:0}
-p,li{max-width:66ch}
+section p,section li,.lead{text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+/* En colonne étroite, un bout de code ne se coupe pas comme un mot : justifié, il creuse des trous. */
+@media (max-width:600px){section p:has(code),section li:has(code){text-align:left}}
 ul,ol{margin:0;padding-left:1.3em;display:grid;gap:6px}
 a{color:var(--ink);text-decoration-color:rgba(234,241,255,.4);text-underline-offset:3px}
 a:hover{text-decoration-color:var(--pom)}
 strong{font-weight:800}
 code{font-family:var(--mono);font-size:.86em;background:rgba(4,11,38,.7);border:1px solid var(--line);border-radius:6px;padding:1px 6px;overflow-wrap:anywhere}
 .ui{font-weight:700;color:#ffd2ab}
-.small{color:var(--faint);font-size:.9rem}
+.small{color:var(--faint);font-size:.9rem;text-align:left}
 hr{border:0;height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:0}
 
 .fig{margin:6px 0;padding:14px;border-radius:18px;background:rgba(4,11,38,.55);border:1px solid var(--line)}
@@ -97,7 +105,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .note strong{color:var(--pom)}
 
 .steps{counter-reset:s;list-style:none;padding:0;display:grid;gap:22px}
-.steps > li{counter-increment:s;position:relative;padding-left:44px;display:grid;gap:10px;max-width:none;min-width:0}
+.steps > li{counter-increment:s;position:relative;padding-left:44px;display:grid;gap:10px;min-width:0}
 .steps > li::before{content:counter(s);position:absolute;left:0;top:-2px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
   font-family:var(--display);font-weight:600;color:#2a1300;background:radial-gradient(circle at 35% 30%,#fff5ea 0 10%,#ffc58f 40%,#ff9344 90%);box-shadow:0 0 12px rgba(255,160,90,.55)}
 
@@ -121,10 +129,10 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
   <div class="top">
     <a class="home" href="./"><img src="assets/logo.png" width="36" height="36" alt=""><span>Linkpearl Sync</span></a>
     <nav class="langs" aria-label="Language">
-      <button type="button" data-lang="ja" lang="ja">日本語</button>
+      <button type="button" data-lang="fr" lang="fr">Français</button>
       <button type="button" data-lang="en" lang="en">English</button>
       <button type="button" data-lang="de" lang="de">Deutsch</button>
-      <button type="button" data-lang="fr" lang="fr">Français</button>
+      <button type="button" data-lang="ja" lang="ja">日本語</button>
     </nav>
   </div>
   <p class="only" id="only" hidden></p>
@@ -138,22 +146,28 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       <h1>Sous le <em>capot</em></h1>
       <p class="lead">Comment deux jeux se trouvent, ce qui est chiffré et comment, ce qu'un serveur peut voir ou non, et comment faire tourner votre propre service de rendez-vous pour votre cercle.</p>
     </div>
-    <ul class="toc" data-v="en">
-      <li><a href="#connect">Connecting</a></li>
-      <li><a href="#crypto">Encryption</a></li>
-      <li><a href="#transfer">Transfers</a></li>
-      <li><a href="#privacy">What servers see</a></li>
-      <li><a href="#federation">Federation</a></li>
-      <li><a class="host" href="#self-host">Host your own</a></li>
-    </ul>
-    <ul class="toc" data-v="fr">
-      <li><a href="#connect">Connexion</a></li>
-      <li><a href="#crypto">Chiffrement</a></li>
-      <li><a href="#transfer">Transferts</a></li>
-      <li><a href="#privacy">Ce que voient les serveurs</a></li>
-      <li><a href="#federation">Fédération</a></li>
-      <li><a class="host" href="#self-host">Héberger le vôtre</a></li>
-    </ul>
+    <nav class="toc" data-v="en" aria-label="Contents">
+      <p class="toc-h">Contents</p>
+      <ul>
+        <li><a href="#connect"><span class="t">Connecting</span><span class="d">How two games find each other</span></a></li>
+        <li><a href="#crypto"><span class="t">Encryption</span><span class="d">What is encrypted, and how</span></a></li>
+        <li><a href="#transfer"><span class="t">Transfers</span><span class="d">Deduplication, checks, throughput</span></a></li>
+        <li><a href="#privacy"><span class="t">What servers see</span><span class="d">What a server sees, and keeps</span></a></li>
+        <li><a href="#federation"><span class="t">Federation</span><span class="d">Many services, none central</span></a></li>
+        <li><a class="host" href="#self-host"><span class="t">Host your own</span><span class="d">Why, and how</span></a></li>
+      </ul>
+    </nav>
+    <nav class="toc" data-v="fr" aria-label="Sommaire">
+      <p class="toc-h">Sommaire</p>
+      <ul>
+        <li><a href="#connect"><span class="t">Connexion</span><span class="d">Comment deux jeux se trouvent</span></a></li>
+        <li><a href="#crypto"><span class="t">Chiffrement</span><span class="d">Ce qui est chiffré, et comment</span></a></li>
+        <li><a href="#transfer"><span class="t">Transferts</span><span class="d">Déduplication, contrôles, débit</span></a></li>
+        <li><a href="#privacy"><span class="t">Ce que voient les serveurs</span><span class="d">Ce qu'un serveur voit et conserve</span></a></li>
+        <li><a href="#federation"><span class="t">Fédération</span><span class="d">Plusieurs services, aucun central</span></a></li>
+        <li><a class="host" href="#self-host"><span class="t">Héberger le vôtre</span><span class="d">Pourquoi, et comment</span></a></li>
+      </ul>
+    </nav>
   </header>
 
   <!-- ============ Connexion ============ -->
@@ -416,6 +430,15 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
   <section id="self-host">
     <div data-v="en">
       <h2>Host your own rendezvous</h2>
+      <h3>Why host your own</h3>
+      <ul>
+        <li><strong>The operator is one of you.</strong> The one real weakness of the protocol, a service slipping into a pairing, goes away: nobody else stands between you.</li>
+        <li><strong>Your circle's metadata stays in the circle.</strong> Who is online, who is paired with whom, IP addresses: your server sees them, a public service does not.</li>
+        <li><strong>You depend on no one.</strong> If the public service goes down or closes, your circle keeps seeing each other.</li>
+        <li><strong>Relays go through a server you chose</strong>, close to you if you like, with bandwidth you know.</li>
+      </ul>
+      <p class="note"><strong>One condition for the first two</strong>: pair with your service alone in the list. A pairing request goes through every service in the list, and the pair then announces on all of them. You can add the public service back afterwards to meet players outside the circle: existing pairs will not announce there, though it will see you online if you stay discoverable.</p>
+      <p><strong>The cost</strong>: a small server and a few minutes of setup, detailed below. And whoever runs it sees what a service sees: pick someone the circle trusts.</p>
       <p>The service is one self-contained binary, <code>lprdv</code>. It needs no .NET runtime and no database.</p>
       <p><strong>You need</strong> a Linux x86-64 server with a public IP address and systemd (a small VPS is enough; the provided unit caps the service at 512 MB of RAM), SSH access with sudo, and one port open in both <strong>TCP and UDP</strong>, 47900 by default.</p>
       <p><strong>Bandwidth</strong>: introducing peers costs almost nothing. Relaying is what costs: two players who can't connect directly send their whole appearance, often hundreds of megabytes, through your server.</p>
@@ -481,6 +504,15 @@ sudo systemctl restart lprdv</code></pre>
     </div>
     <div data-v="fr">
       <h2>Héberger votre propre rendez-vous</h2>
+      <h3>Pourquoi héberger le vôtre</h3>
+      <ul>
+        <li><strong>L'opérateur est l'un des vôtres.</strong> La seule vraie faiblesse du protocole, un service qui s'intercale au moment du pairage, disparaît : personne d'autre ne se tient entre vous.</li>
+        <li><strong>Les métadonnées de votre cercle restent dans le cercle.</strong> Qui est en ligne, qui est pairé avec qui, les adresses IP : votre serveur les voit, un service public non.</li>
+        <li><strong>Vous ne dépendez de personne.</strong> Si le service public tombe ou ferme, votre cercle continue de se voir.</li>
+        <li><strong>Les relais passent par un serveur que vous avez choisi</strong>, proche de vous si vous voulez, avec une bande passante que vous connaissez.</li>
+      </ul>
+      <p class="note"><strong>Une condition pour les deux premiers points</strong> : pairez-vous avec votre service seul dans la liste. Une demande de pairage passe par tous les services de la liste, et la paire s'annonce ensuite sur chacun. Vous pourrez rajouter le service public après, pour croiser des joueurs hors du cercle : les pairages déjà formés ne s'y annonceront pas, mais il vous verra en ligne si vous restez détectable.</p>
+      <p><strong>Ce que ça coûte</strong> : un petit serveur et quelques minutes d'installation, détaillés ci-dessous. Et celui qui le fait tourner voit ce que voit un service : choisissez quelqu'un en qui le cercle a confiance.</p>
       <p>Le service est un seul binaire autonome, <code>lprdv</code>. Il n'a besoin ni du runtime .NET ni de base de données.</p>
       <p><strong>Il vous faut</strong> un serveur Linux x86-64 avec une adresse IP publique et systemd (un petit VPS suffit ; l'unité fournie plafonne le service à 512 Mo de mémoire), un accès SSH avec sudo, et un port ouvert en <strong>TCP et en UDP</strong>, 47900 par défaut.</p>
       <p><strong>La bande passante</strong> : mettre les pairs en relation ne coûte presque rien. C'est le relais qui coûte : deux joueurs qui ne peuvent pas se connecter directement font passer toute leur apparence, souvent des centaines de mégaoctets, par votre serveur.</p>
