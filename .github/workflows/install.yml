@@ -56,6 +56,15 @@ jobs:
           sudo /opt/lprdv/lprdv update | tee update.txt
           grep -q 'à jour' update.txt
 
+      - name: L'unité durcie tourne pour de vrai sous systemd
+        # Le durcissement (ProtectSystem, ProtectHome, familles d'adresses)
+        # doit laisser la ronde joindre GitHub et vérifier la signature.
+        run: |
+          sudo systemctl start lprdv-update.service
+          test "$(systemctl show -p Result --value lprdv-update.service)" = success
+          sudo journalctl -u lprdv-update.service --no-pager | tee journal.txt
+          grep -q 'à jour' journal.txt
+
       - name: Relancé sans option, il met à jour et garde tout
         run: |
           token=$(sudo cat /var/lib/lprdv/admin.token)
@@ -65,13 +74,26 @@ jobs:
           systemctl show lprdv -p ExecStart --value | grep -q -- '--port 47910'
           test "$token" = "$(sudo cat /var/lib/lprdv/admin.token)"
 
+      - name: Un serveur installé avant le minuteur le reçoit, actif
+        run: |
+          sudo systemctl disable --now lprdv-update.timer
+          sudo rm /etc/systemd/system/lprdv-update.service /etc/systemd/system/lprdv-update.timer
+          sudo systemctl daemon-reload
+          sudo bash install.sh --no-firewall
+          systemctl is-enabled lprdv-update.timer
+
       - name: Sans mise à jour automatique, le minuteur est coupé et le reste
         # Une commande niée ne fait pas échouer bash -e : on teste par if.
         run: |
           sudo bash install.sh --no-auto-update --no-firewall
           if systemctl is-enabled --quiet lprdv-update.timer; then echo "minuteur encore actif"; exit 1; fi
+          # Couper la mise à jour ne touche pas aux options du service.
+          systemctl show lprdv -p ExecStart --value | grep -q -- '--port 47910'
           sudo bash install.sh --no-firewall
           if systemctl is-enabled --quiet lprdv-update.timer; then echo "minuteur réactivé à tort"; exit 1; fi
+          sudo bash install.sh --auto-update --no-firewall
+          systemctl is-enabled lprdv-update.timer
+          systemctl show lprdv -p ExecStart --value | grep -q -- '--port 47910'
 
       - name: Journal en cas d'échec
         if: failure()
