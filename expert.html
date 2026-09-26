@@ -456,7 +456,7 @@ cd /tmp
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.service
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.sha256
-sha256sum -c lprdv.sha256
+sha256sum -c --ignore-missing lprdv.sha256
 sudo install -D -m 0755 lprdv /opt/lprdv/lprdv
 
 <span class="c"># hardened systemd unit, restarts on its own</span>
@@ -497,7 +497,7 @@ ExecStart=/opt/lprdv/lprdv --port 47900 --public-address rdv.example.org --label
         </li>
         <li>
           <h3>Update</h3>
-          <p>Rerun the <a href="heberger.html">generator</a>'s command, which keeps your options, or download and check the new binary as in step 1, then:</p>
+          <p>Servers installed with the <a href="heberger.html">generator</a> update themselves, 24 hours after each signed release. By hand, rerun its command, or download and check the new binary as in step 1, then:</p>
 <pre><code>sudo install -m 0755 /tmp/lprdv /opt/lprdv/lprdv
 sudo systemctl restart lprdv</code></pre>
         </li>
@@ -532,7 +532,7 @@ cd /tmp
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.service
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.sha256
-sha256sum -c lprdv.sha256
+sha256sum -c --ignore-missing lprdv.sha256
 sudo install -D -m 0755 lprdv /opt/lprdv/lprdv
 
 <span class="c"># unité systemd durcie, qui redémarre seule</span>
@@ -573,7 +573,7 @@ ExecStart=/opt/lprdv/lprdv --port 47900 --public-address rdv.exemple.fr --label 
         </li>
         <li>
           <h3>Mettre à jour</h3>
-          <p>Relancer la commande du <a href="heberger.html#fr">générateur</a>, qui garde les options, ou télécharger et vérifier le nouveau binaire comme à l'étape 1, puis :</p>
+          <p>Les serveurs installés par le <a href="heberger.html#fr">générateur</a> se mettent à jour seuls, 24 heures après chaque release signée. À la main, relancer sa commande, ou télécharger et vérifier le nouveau binaire comme à l'étape 1, puis :</p>
 <pre><code>sudo install -m 0755 /tmp/lprdv /opt/lprdv/lprdv
 sudo systemctl restart lprdv</code></pre>
         </li>

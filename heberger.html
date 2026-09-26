@@ -135,6 +135,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
     </div>
     <label class="check"><input type="checkbox" id="announce" checked><span><b data-t="announce">Join the open circle</b><span class="small" data-t="announceHint"></span></span></label>
     <label class="check"><input type="checkbox" id="firewall" checked><span><b data-t="firewall">Open the port in ufw or firewalld</b><span class="small" data-t="firewallHint"></span></span></label>
+    <label class="check"><input type="checkbox" id="autoupdate" checked><span><b data-t="autoUpdate">Update automatically</b><span class="small" data-t="autoUpdateHint"></span></span></label>
   </form>
 
   <section class="out">
@@ -170,7 +171,8 @@ const TEXT = {
     port: "Port",
     announce: "Join the open circle", announceHint: "The server applies at startup, then every day.",
     firewall: "Open the port in ufw or firewalld", firewallHint: "Your host's firewall panel, if it has one, is up to you.",
-    after: "Running the same command again updates the service; without options, it keeps the ones already set. /var/lib/lprdv is never touched.",
+    autoUpdate: "Update automatically", autoUpdateHint: "Signed releases only, 24 hours after publication. Back to the previous version if the new one doesn't answer.",
+    after: "Running the same command again updates the service; run the full command again to change an option. /var/lib/lprdv is never touched.",
     readScript: "Read the script", manual: "Step by step instead", network: "The open circle",
     badAddress: "A name or an IPv4 address, optionally followed by :port.",
     badLabel: "No quote, backslash, $, % or backtick.",
@@ -182,7 +184,8 @@ const TEXT = {
     port: "Port",
     announce: "Rejoindre le cercle ouvert", announceHint: "Le serveur se porte candidat au démarrage, puis chaque jour.",
     firewall: "Ouvrir le port dans ufw ou firewalld", firewallHint: "Le pare-feu de l'hébergeur, s'il en a un, reste à régler soi-même.",
-    after: "Relancer la même commande met le service à jour ; sans option, elle garde celles déjà posées. /var/lib/lprdv n'est jamais touché.",
+    autoUpdate: "Mettre à jour automatiquement", autoUpdateHint: "Versions signées seulement, 24 heures après leur publication. Retour à la précédente si la nouvelle ne répond pas.",
+    after: "Relancer la même commande met le service à jour ; relancer la commande complète pour changer une option. /var/lib/lprdv n'est jamais touché.",
     readScript: "Lire le script", manual: "Pas à pas plutôt", network: "Le cercle ouvert",
     badAddress: "Un nom ou une adresse IPv4, éventuellement suivi de :port.",
     badLabel: "Sans guillemet, barre oblique inverse, $, % ni accent grave.",
@@ -248,6 +251,7 @@ function build() {
   if (label) args.push("--label", quote(label));
   if (!$("announce").checked) args.push("--no-announce");
   if (!$("firewall").checked) args.push("--no-firewall");
+  if (!$("autoupdate").checked) args.push("--no-auto-update");
 
   const command = `curl -fsSL ${SCRIPT} | sudo bash` + (args.length ? ` -s -- ${args.join(" ")}` : "");
   const valid = !Object.values(errors).some(Boolean);

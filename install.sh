@@ -9,6 +9,7 @@
 #   --label TEXTE          nom affiché dans les annuaires
 #   --no-announce          ne pas se porter candidat au cercle ouvert
 #   --no-firewall          ne pas toucher au pare-feu
+#   --no-auto-update       ne pas se mettre à jour seul (lprdv-update.timer)
 #
 # Rejouable : relancé sans option de configuration, il met à jour le binaire
 # et l'unité et garde les options déjà posées. Il ne touche jamais à
@@ -31,6 +32,7 @@ public_address=""
 label=""
 announce=1
 firewall=1
+auto_update=""
 configured=0
 
 while [ $# -gt 0 ]; do
@@ -40,6 +42,7 @@ while [ $# -gt 0 ]; do
     --label) label="${2:-}"; configured=1; shift 2 ;;
     --no-announce) announce=0; configured=1; shift ;;
     --no-firewall) firewall=0; shift ;;
+    --no-auto-update) auto_update=0; configured=1; shift ;;
     *) die "option inconnue : $1 (voir https://linkpearl-sync.github.io/heberger.html)" ;;
   esac
 done
@@ -82,7 +85,7 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
 say "Téléchargement de la dernière version"
-for file in lprdv lprdv.service lprdv.sha256; do
+for file in lprdv lprdv.service lprdv-update.service lprdv-update.timer lprdv.sha256; do
   curl -fsSL --retry 3 -o "$work/$file" "$RELEASES/$file"
 done
 # La somme couvre le binaire et l'unité : rien n'est posé sans elle.
@@ -95,6 +98,16 @@ install -d -m 0755 /opt/lprdv
 install -m 0755 "$work/lprdv" /opt/lprdv/lprdv.new
 mv -f /opt/lprdv/lprdv.new /opt/lprdv/lprdv
 install -m 0644 "$work/lprdv.service" /etc/systemd/system/lprdv.service
+install -m 0644 "$work/lprdv-update.service" /etc/systemd/system/lprdv-update.service
+install -m 0644 "$work/lprdv-update.timer" /etc/systemd/system/lprdv-update.timer
+# Sans option, on garde le choix déjà fait ; au premier passage, actif.
+if [ -z "$auto_update" ]; then
+  if [ "$configured" -eq 0 ] && [ -f "$DROPIN" ] && ! systemctl is-enabled --quiet lprdv-update.timer; then
+    auto_update=0
+  else
+    auto_update=1
+  fi
+fi
 
 if [ "$configured" -eq 1 ] || [ ! -f "$DROPIN" ]; then
   args="--port $port"
@@ -131,6 +144,12 @@ systemctl daemon-reload
 systemctl enable --quiet lprdv
 systemctl restart lprdv
 
+if [ "$auto_update" -eq 1 ]; then
+  systemctl enable --now --quiet lprdv-update.timer
+else
+  systemctl disable --now --quiet lprdv-update.timer 2>/dev/null || true
+fi
+
 for _ in $(seq 30); do
   if curl -fs -o /dev/null "http://127.0.0.1:$ADMIN_PORT/healthz"; then
     # Sans adresse donnée, on n'en devine pas : le nom de la machine est
@@ -156,6 +175,8 @@ puis http://localhost:$ADMIN_PORT, avec ce jeton comme mot de passe :
 
 Sauvegarder /var/lib/lprdv : la liste de bannissement et son sel ne se
 reconstruisent pas.
+
+Mise à jour automatique : $(if [ "$auto_update" -eq 1 ]; then echo "active, chaque heure"; else echo "coupée"; fi).
 EOF
     exit 0
   fi

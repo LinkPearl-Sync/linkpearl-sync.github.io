@@ -34,7 +34,8 @@ le plugin ou le rendez-vous change de comportement (connexion, relais, options d
   un service de rendez-vous en une commande ; `heberger.html` écrit cette commande. Le script
   prend la dernière release du rendez-vous, vérifiée par `lprdv.sha256`, qui couvre le binaire
   et l'unité systemd, et pose les options dans un complément
-  (`/etc/systemd/system/lprdv.service.d/options.conf`). Les règles de validation sont les mêmes
+  (`/etc/systemd/system/lprdv.service.d/options.conf`). Il installe aussi `lprdv-update.timer`, la mise à jour
+  automatique, sauf avec `--no-auto-update`. Les règles de validation sont les mêmes
   dans les deux fichiers : en changer une, c'est changer l'autre.
   `.github/workflows/install.yml` l'exécute pour de vrai sur un runner jetable, à chaque
   modification et chaque lundi.
