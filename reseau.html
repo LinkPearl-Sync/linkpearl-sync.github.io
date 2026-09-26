@@ -94,7 +94,7 @@ td.num,th.num{font-variant-numeric:tabular-nums;text-align:right;white-space:now
 .dot.warn{background:var(--warn)}
 .dot.bad{background:var(--bad)}
 
-.probation{display:grid;gap:12px}
+.pcards{display:grid;gap:12px}
 .pcard{display:grid;gap:8px;padding:14px 18px;border-radius:18px;border:1px solid var(--line);background:var(--card)}
 .pcard .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
 .pcard .label{font-weight:800}
@@ -116,6 +116,7 @@ pre code{background:none;border:0;padding:0;font-size:inherit;overflow-wrap:norm
 .key dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 18px}
 .key dt{color:var(--mute)}
 .key dd{margin:0;font-variant-numeric:tabular-nums}
+#key-more{display:grid;gap:10px}
 .key .fp{font-family:var(--mono);font-size:.84rem;color:#cfe6ff;overflow-wrap:anywhere}
 details summary{cursor:pointer;color:var(--mute);font-size:.9rem}
 details code{display:block;margin-top:8px;padding:10px 12px}
@@ -126,6 +127,15 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
   body{font-size:16px}
   pre{padding-right:16px;padding-top:40px}
   .key dl{grid-template-columns:1fr}
+  /* En colonne étroite, chaque service devient une petite fiche : nom et
+     disponibilité en tête, puis l'adresse entière, puis la date. */
+  .tbl thead{display:none}
+  .tbl tr{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:10px 14px}
+  .tbl tr + tr{border-top:1px solid var(--line)}
+  .tbl td{padding:0;border:0 !important}
+  .tbl td.addr{grid-column:1 / -1;grid-row:2}
+  .tbl td.when{grid-column:1 / -1;grid-row:3;color:var(--mute);font-size:.88rem}
+  .tbl td.num{grid-column:2;grid-row:1}
   .key dd{margin-bottom:6px}
 }
 </style>
@@ -180,7 +190,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
   <section id="probation" hidden>
     <h2><span data-t="probationTitle">On probation</span></h2>
     <p class="small" data-t="probationHint"></p>
-    <div class="probation" id="probation-cards"></div>
+    <div class="pcards" id="probation-cards"></div>
   </section>
 
   <section id="delisted" hidden>
@@ -228,8 +238,10 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
         <dt data-t="expires">Expires</dt><dd id="expires"></dd>
         <dt data-t="fingerprint">Key fingerprint</dt><dd class="fp" id="fingerprint"></dd>
       </dl>
-      <p class="small" data-t="keyHint"></p>
-      <details><summary data-t="fullKey">Full public key (P-256)</summary><code class="fp" id="public-key"></code></details>
+      <div id="key-more">
+        <p class="small" data-t="keyHint"></p>
+        <details><summary data-t="fullKey">Full public key (P-256)</summary><code class="fp" id="public-key"></code></details>
+      </div>
     </div>
   </section>
 
@@ -369,7 +381,7 @@ function render() {
     const row = rows.insertRow();
     cell(row, s.label, "label");
     cell(row, s.address, "addr");
-    cell(row, s.since ? date(s.since) : "");
+    cell(row, s.since ? date(s.since) : "", "when");
     availability(row, s.availability24h);
   }
 
@@ -423,7 +435,7 @@ function render() {
     const row = gone.insertRow();
     cell(row, s.label, "label");
     cell(row, s.address, "addr");
-    cell(row, s.since ? date(s.since, true) : "");
+    cell(row, s.since ? date(s.since, true) : "", "when");
     cell(row, s.lastSeen ? date(s.lastSeen, true) : "", "num");
   }
 
@@ -431,6 +443,7 @@ function render() {
   $("no-list").hidden = !!authority;
   $("no-list").textContent = t.noList;
   $("list-facts").hidden = !authority;
+  $("key-more").hidden = !authority;
   if (authority) {
     $("issued").textContent = date(authority.issued, true);
     $("expires").textContent = date(authority.expires, true);

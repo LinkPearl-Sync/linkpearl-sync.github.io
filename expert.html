@@ -384,6 +384,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
         <li><strong>A pairing survives the loss of a server.</strong> Each pair remembers the services both sides used when pairing, and announces on all of them in parallel; the first match wins.</li>
         <li><strong>Servers ignore each other.</strong> None queries, relays for, or vouches for another. This is deliberate: if servers answered for each other, one your operator quietly added could claim someone's mailbox and slip into their pairings.</li>
         <li><strong>Directories inform, they never decide.</strong> A service can publish the list of services it knows. The refresh button next to a service in your list shows it, and nothing is added until you tick it. A new service can apply to be listed, and waits for a human to approve.</li>
+        <li><strong>The open circle.</strong> On top of the services you pick, the plugin can spread each pairing over two services run by volunteers. They are admitted automatically after 72 hours of reliable answers, on a list signed by a single authority that never sees a player. <a href="reseau.html">Who is in it, and how to join</a>.</li>
         <li><strong>The price.</strong> Each active service learns that your character is online and who is around you. More services means more people you can see, and more operators who know. Keep the list short.</li>
       </ul>
     </div>
@@ -419,6 +420,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
         <li><strong>Un pairage survit à la perte d'un serveur.</strong> Chaque paire retient les services des deux côtés au moment du pairage, et s'annonce sur tous en parallèle ; le premier qui apparie gagne.</li>
         <li><strong>Les serveurs s'ignorent.</strong> Aucun n'en interroge, n'en relaie ni ne répond pour un autre. C'est voulu : si les serveurs répondaient les uns pour les autres, un serveur ajouté en douce par un opérateur pourrait revendiquer la boîte de quelqu'un et s'intercaler dans ses pairages.</li>
         <li><strong>Les annuaires informent, ils ne décident jamais.</strong> Un service peut publier la liste de ceux qu'il connaît. Le bouton d'actualisation à côté d'un service de la liste l'affiche, et rien n'est ajouté sans une case cochée. Un nouveau service peut demander à y figurer, et attend qu'un humain l'approuve.</li>
+        <li><strong>Le cercle ouvert.</strong> En plus des services choisis, le plugin peut répartir chaque pairage sur deux services tenus par des bénévoles. Ils y entrent d'office après 72 heures de réponses fiables, sur une liste signée par une seule autorité qui ne voit aucun joueur. <a href="reseau.html#fr">Qui en fait partie, et comment le rejoindre</a>.</li>
         <li><strong>Le prix.</strong> Chaque service actif apprend que le personnage est en ligne et qui se tient autour. Plus de services, c'est plus de monde à voir, et plus d'opérateurs qui savent. Mieux vaut garder la liste courte.</li>
       </ul>
     </div>
@@ -580,6 +582,7 @@ sudo systemctl restart lprdv</code></pre>
 
   <footer>
     <a href="./" data-i18n="home">Home</a>
+    <a href="reseau.html" data-i18n="network">The open circle</a>
     <a href="https://github.com/orgs/LinkPearl-Sync/projects/3" data-i18n="roadmap">Roadmap</a>
     <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin" data-i18n="plugin">Plugin source</a>
     <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous" data-i18n="rdv">Rendezvous source</a>
@@ -593,11 +596,11 @@ sudo systemctl restart lprdv</code></pre>
 // qui le lui dit dans sa langue.
 const LANGS = ["ja", "en", "de", "fr"];
 const CHROME = {
-  en: { home: "Home", roadmap: "Roadmap", plugin: "Plugin source", rdv: "Rendezvous source", bug: "Report a problem", copy: "Copy", copied: "Copied ✓", only: "" },
-  fr: { home: "Accueil", roadmap: "Feuille de route", plugin: "Code du plugin", rdv: "Code du rendez-vous", bug: "Signaler un problème", copy: "Copier", copied: "Copié ✓", only: "" },
-  de: { home: "Startseite", roadmap: "Roadmap", plugin: "Quellcode des Plugins", rdv: "Quellcode des Rendezvous-Dienstes", bug: "Problem melden", copy: "Kopieren", copied: "Kopiert ✓",
+  en: { home: "Home", network: "The open circle", roadmap: "Roadmap", plugin: "Plugin source", rdv: "Rendezvous source", bug: "Report a problem", copy: "Copy", copied: "Copied ✓", only: "" },
+  fr: { home: "Accueil", network: "Le cercle ouvert", roadmap: "Feuille de route", plugin: "Code du plugin", rdv: "Code du rendez-vous", bug: "Signaler un problème", copy: "Copier", copied: "Copié ✓", only: "" },
+  de: { home: "Startseite", network: "Der offene Kreis", roadmap: "Roadmap", plugin: "Quellcode des Plugins", rdv: "Quellcode des Rendezvous-Dienstes", bug: "Problem melden", copy: "Kopieren", copied: "Kopiert ✓",
         only: "Diese technische Seite gibt es nur auf Englisch und Französisch. Hier die englische Fassung." },
-  ja: { home: "ホーム", roadmap: "ロードマップ", plugin: "プラグインのソースコード", rdv: "ランデブーサーバーのソースコード", bug: "不具合を報告", copy: "コピー", copied: "コピーしました ✓",
+  ja: { home: "ホーム", network: "オープンサークル", roadmap: "ロードマップ", plugin: "プラグインのソースコード", rdv: "ランデブーサーバーのソースコード", bug: "不具合を報告", copy: "コピー", copied: "コピーしました ✓",
         only: "この技術ページは英語とフランス語のみです。英語版を表示しています。" },
 };
 let lang = "en";
