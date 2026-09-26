@@ -144,7 +144,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
     </div>
     <div data-v="fr">
       <h1>Sous le <em>capot</em></h1>
-      <p class="lead">Comment deux jeux se trouvent, ce qui est chiffré et comment, ce qu'un serveur peut voir ou non, et comment faire tourner votre propre service de rendez-vous pour votre cercle.</p>
+      <p class="lead">Comment deux jeux se trouvent, ce qui est chiffré et comment, ce qu'un serveur peut voir ou non, et comment faire tourner son propre service de rendez-vous pour un cercle d'amis.</p>
     </div>
     <nav class="toc" data-v="en" aria-label="Contents">
       <p class="toc-h">Contents</p>
@@ -165,7 +165,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
         <li><a href="#transfer"><span class="t">Transferts</span><span class="d">Déduplication, contrôles, débit</span></a></li>
         <li><a href="#privacy"><span class="t">Ce que voient les serveurs</span><span class="d">Ce qu'un serveur voit et conserve</span></a></li>
         <li><a href="#federation"><span class="t">Fédération</span><span class="d">Plusieurs services, aucun central</span></a></li>
-        <li><a class="host" href="#self-host"><span class="t">Héberger le vôtre</span><span class="d">Pourquoi, et comment</span></a></li>
+        <li><a class="host" href="#self-host"><span class="t">Auto-hébergement</span><span class="d">Pourquoi, et comment</span></a></li>
       </ul>
     </nav>
   </header>
@@ -204,7 +204,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
     </div>
     <div data-v="fr">
       <h2>Comment deux joueurs se connectent</h2>
-      <p>Aucun serveur ne détient vos fichiers. Votre jeu parle directement à celui de votre ami. Un petit <strong>service de rendez-vous</strong> vous aide seulement à vous trouver, et relaie des octets chiffrés quand la connexion directe est impossible.</p>
+      <p>Aucun serveur ne détient les fichiers. Le jeu d'un joueur parle directement à celui de son ami. Un petit <strong>service de rendez-vous</strong> les aide seulement à se trouver, et relaie des octets chiffrés quand la connexion directe est impossible.</p>
       <figure class="fig">
         <svg viewBox="0 0 600 190" role="img" aria-label="Deux joueurs reliés directement ; le service de rendez-vous, au-dessus, ne fait que les présenter">
           <defs>
@@ -213,24 +213,24 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
           <rect x="220" y="14" width="160" height="44" rx="12" fill="#0b1850" stroke="#5fb4ff" stroke-opacity=".5"/>
           <text x="300" y="42" text-anchor="middle" font-size="15" font-weight="700">rendez-vous</text>
           <path d="M235 58 L105 118 M365 58 L495 118" stroke="#a9b8e6" stroke-width="1.5" stroke-dasharray="5 6" fill="none"/>
-          <text x="150" y="76" class="f" font-size="12" text-anchor="middle">vous présente</text>
+          <text x="150" y="76" class="f" font-size="12" text-anchor="middle">présente</text>
           <text x="455" y="76" class="f" font-size="12" text-anchor="middle">relaie au besoin</text>
           <path d="M112 140 C 250 118, 350 162, 488 140" stroke="#5fb4ff" stroke-width="4" fill="none" opacity=".35"/>
           <path d="M112 140 C 250 118, 350 162, 488 140" stroke="#bfe4ff" stroke-width="1.8" fill="none"/>
           <circle cx="90" cy="140" r="22" fill="url(#pf)"/>
           <circle cx="510" cy="140" r="22" fill="url(#pf)"/>
-          <text x="90" y="182" text-anchor="middle" font-size="14" font-weight="700">vous</text>
-          <text x="510" y="182" text-anchor="middle" font-size="14" font-weight="700">votre ami</text>
+          <text x="90" y="182" text-anchor="middle" font-size="14" font-weight="700">joueur</text>
+          <text x="510" y="182" text-anchor="middle" font-size="14" font-weight="700">ami</text>
           <text x="300" y="176" text-anchor="middle" class="m" font-size="13">direct, chiffré de bout en bout</text>
         </svg>
       </figure>
       <ol>
-        <li><strong>Détection.</strong> Chaque plugin ouvre une boîte aux lettres sur le rendez-vous. Son adresse se calcule depuis le nom et le monde du personnage : <code>SHA-256("linkpearl:mbox:v1" ‖ nom@monde ‖ fenêtre)</code>, tronqué. Quiconque voit votre personnage peut la calculer ; c'est ainsi que le glyphe orange apparaît à côté des joueurs qui utilisent Linkpearl.</li>
+        <li><strong>Détection.</strong> Chaque plugin ouvre une boîte aux lettres sur le rendez-vous. Son adresse se calcule depuis le nom et le monde du personnage : <code>SHA-256("linkpearl:mbox:v1" ‖ nom@monde ‖ fenêtre)</code>, tronqué. Quiconque voit le personnage peut la calculer ; c'est ainsi que le glyphe orange apparaît à côté des joueurs qui utilisent Linkpearl.</li>
         <li><strong>Pairage.</strong> Une demande arrive dans la boîte de la cible. Elle accepte en jeu, et chacun range la clé publique de l'autre dans son carnet local. Personne n'a jamais à voir une clé. La demande et la réponse portent chacune une clé à usage unique : le secret que partage la paire vient de leur accord, et le service qui les a transportées ne peut pas le calculer.</li>
         <li><strong>Connexion.</strong> Toutes les dix minutes, chacun annonce un ticket dérivé d'un secret que seule la paire connaît : <code>HMAC-SHA256(secret, "linkpearl:rv:v1" ‖ ⌊unix / 600⌋)</code>. Quand deux annonces correspondent, le service échange les deux adresses. Les listes d'adresses sont scellées sous une clé dérivée de ce même secret, donc le service ne peut pas les lire. Les plugins essaient alors les adresses de l'autre par ordre de priorité (réseau local, puis l'adresse publique que le service a observée) et percent le NAT.</li>
       </ol>
-      <p><strong>Quand aucun chemin direct n'existe</strong> (certains NAT stricts), la session passe par le relais du service qui vous a mis en relation, toujours chiffrée de bout en bout : il ne voit que des octets scellés. Votre liste de pairs indique si chaque session est directe ou relayée.</p>
-      <p>Une connexion directe montre votre adresse IP à votre pair, comme tout jeu ou chat vocal en pair à pair. Seules les personnes avec qui vous vous êtes pairé l'obtiennent. Une session relayée après un essai direct raté ne la cache pas non plus : les adresses ont été échangées pendant l'essai.</p>
+      <p><strong>Quand aucun chemin direct n'existe</strong> (certains NAT stricts), la session passe par le relais du service qui a mis les deux joueurs en relation, toujours chiffrée de bout en bout : il ne voit que des octets scellés. La liste des pairs indique si chaque session est directe ou relayée.</p>
+      <p>Une connexion directe montre l'adresse IP de chaque joueur à son pair, comme tout jeu ou chat vocal en pair à pair. Seuls les pairs établis l'obtiennent. Une session relayée après un essai direct raté ne la cache pas non plus : les adresses ont été échangées pendant l'essai.</p>
     </div>
   </section>
 
@@ -269,9 +269,9 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
         <tr><td>Adressage de contenu</td><td>SHA-256</td></tr>
       </table></div>
       <ul>
-        <li><strong>Une identité par personnage</strong>, engendrée sur votre PC. La clé privée ne le quitte jamais, sauf dans le fichier de sauvegarde que vous choisissez de faire.</li>
+        <li><strong>Une identité par personnage</strong>, engendrée sur le PC du joueur. La clé privée ne le quitte jamais, sauf dans un fichier de sauvegarde fait à la demande.</li>
         <li><strong>Handshake SIGMA-I</strong> : authentification mutuelle sur un transcript qui contient les deux clés éphémères, et confidentialité persistante. Voler une clé d'identité plus tard ne déchiffre pas les sessions passées. Chaque côté apporte des clés neuves à usage unique, donc un handshake rejoué ne mène nulle part.</li>
-        <li><strong>L'autorisation vient de votre seul carnet local.</strong> La clé publique reçue doit être exactement celle rangée pour ce pair, et elle est comparée avant tout travail cryptographique.</li>
+        <li><strong>L'autorisation vient du seul carnet local.</strong> La clé publique reçue doit être exactement celle rangée pour ce pair, et elle est comparée avant tout travail cryptographique.</li>
         <li><strong>Canal de données</strong> : chaque message est scellé en AES-256-GCM. Le nonce porte l'index du canal, donc deux canaux ne peuvent jamais en réutiliser un, et les compteurs n'avancent qu'après authentification.</li>
       </ul>
       <p class="note"><strong>Une construction maison.</strong> Le protocole complet, son modèle de confiance et ses limites connues sont décrits dans <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/blob/main/docs/protocol.md">docs/protocol.md</a>.</p>
@@ -303,7 +303,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
         <li><strong>Les fichiers sont nommés par leur contenu.</strong> Chacun est rangé sous le SHA-256 de ses octets, recalculé à la réception. Rien de ce qui vient du réseau ne devient jamais un nom de fichier.</li>
         <li><strong>Déduplication gratuite.</strong> Si trois pairs utilisent la même texture de peau, elle n'est téléchargée qu'une fois. Un pair revu le lendemain sans changement coûte zéro octet : seul son manifeste voyage.</li>
         <li><strong>Pensé pour les apparences lourdes.</strong> Une apparence moddée moyenne pèse environ 800 Mo. Les fichiers sont découpés en tronçons de 4 Mio répartis sur 32 canaux parallèles, parce qu'un canal LiteNetLib seul plafonne vers 1,5 Mo/s à 60 ms de latence.</li>
-        <li><strong>Tout ce qui est reçu est contrôlé avant d'atteindre Penumbra ou votre disque</strong> : chemins de jeu, extensions, tailles, nombre d'entrées. Un manifeste qui viole une seule règle est rejeté en entier. Les animations sont aussi vérifiées contre le squelette qu'elles visent.</li>
+        <li><strong>Tout ce qui est reçu est contrôlé avant d'atteindre Penumbra ou le disque</strong> : chemins de jeu, extensions, tailles, nombre d'entrées. Un manifeste qui viole une seule règle est rejeté en entier. Les animations sont aussi vérifiées contre le squelette qu'elles visent.</li>
         <li><strong>Le cache accélère, il ne remplace pas le consentement.</strong> Un pair injoignable garde son apparence par défaut, même si sa dernière apparence est encore en cache.</li>
       </ul>
       <div class="tbl"><table>
@@ -336,15 +336,15 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       <h2>Ce que voit un service de rendez-vous</h2>
       <div class="tbl"><table>
         <tr><th><span aria-hidden="true">✅</span> Il voit</th><th><span aria-hidden="true">🚫</span> Il ne voit jamais</th></tr>
-        <tr><td>Les adresses IP</td><td>Vos fichiers et vos apparences</td></tr>
+        <tr><td>Les adresses IP</td><td>Les fichiers et les apparences</td></tr>
         <tr><td>Quels personnages sont en ligne, s'ils sont détectables</td><td>Les manifestes et les clés privées</td></tr>
         <tr><td>Qui est pairé avec qui : les demandes de pairage et les adresses IP le trahissent</td><td>Le secret que partage chaque paire</td></tr>
         <tr><td>Les demandes de pairage : nom, monde et clés publiques</td><td>Les sessions, directes ou relayées : seulement des octets scellés</td></tr>
         <tr><td>Que deux tickets correspondent dans une fenêtre de dix minutes</td><td>Ce que les pairs échangent une fois connectés</td></tr>
       </table></div>
-      <p><strong>Être détectable, c'est être détectable.</strong> Pour qu'un inconnu vous reconnaisse en jeu, l'adresse de votre boîte doit dériver de votre nom, et les noms de FFXIV s'énumèrent. L'opérateur d'un service peut donc savoir quels personnages sont en ligne. Vous pouvez vous en retirer avec <span class="ui">Me signaler aux autres joueurs</span> dans <span class="ui">Réglages › Visibilité</span> ; personne ne peut alors vous repérer ni vous envoyer de demande.</p>
-      <p><strong>Ce qu'un service conserve : rien sur disque, et peu de temps en mémoire.</strong> Une demande de pairage n'est jamais stockée : elle est remise aussitôt, ou abandonnée si la cible n'est pas connectée. Une boîte n'existe que tant que votre jeu est connecté, une annonce vit dix minutes au plus, une invitation vingt-quatre heures et disparaît dès qu'elle sert. Votre adresse IP n'est gardée que le temps de la connexion. Par défaut, le journal dit ce qui se passe, jamais à qui : ni adresse IP, ni nom. Il part dans le journal système de l'hébergeur, dont l'opérateur règle la durée de conservation.</p>
-      <p><strong>Un rendez-vous n'est pas une autorité.</strong> Il peut faire échouer une connexion ; il ne peut ni lire vos fichiers ni se faire passer pour un pair déjà établi. Une réserve, dite franchement : une demande de pairage passe par la boîte de la cible, donc un opérateur malveillant pourrait s'intercaler à ce moment-là, sans que ni l'un ni l'autre ne s'en aperçoive. C'est pourquoi le choix des services compte, et pourquoi un cercle qui fait tourner le sien est la configuration la plus sûre : l'opérateur est l'un des vôtres.</p>
+      <p><strong>Être détectable, c'est être détectable.</strong> Pour qu'un inconnu reconnaisse un joueur en jeu, l'adresse de sa boîte doit dériver de son nom, et les noms de FFXIV s'énumèrent. L'opérateur d'un service peut donc savoir quels personnages sont en ligne. Le réglage <span class="ui">Me signaler aux autres joueurs</span>, dans <span class="ui">Réglages › Visibilité</span>, permet de s'en retirer ; personne ne peut alors repérer le personnage ni lui envoyer de demande.</p>
+      <p><strong>Ce qu'un service conserve : rien sur disque, et peu de temps en mémoire.</strong> Une demande de pairage n'est jamais stockée : elle est remise aussitôt, ou abandonnée si la cible n'est pas connectée. Une boîte n'existe que tant que le jeu est connecté, une annonce vit dix minutes au plus, une invitation vingt-quatre heures et disparaît dès qu'elle sert. L'adresse IP n'est gardée que le temps de la connexion. Par défaut, le journal dit ce qui se passe, jamais à qui : ni adresse IP, ni nom. Il part dans le journal système de l'hébergeur, dont l'opérateur règle la durée de conservation.</p>
+      <p><strong>Un rendez-vous n'est pas une autorité.</strong> Il peut faire échouer une connexion ; il ne peut ni lire les fichiers ni se faire passer pour un pair déjà établi. Une réserve, dite franchement : une demande de pairage passe par la boîte de la cible, donc un opérateur malveillant pourrait s'intercaler à ce moment-là, sans que ni l'un ni l'autre ne s'en aperçoive. C'est pourquoi le choix des services compte, et pourquoi un cercle qui fait tourner le sien est la configuration la plus sûre : l'opérateur fait partie du cercle.</p>
     </div>
   </section>
 
@@ -389,7 +389,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
     </div>
     <div data-v="fr">
       <h2>Fédération</h2>
-      <p>Il n'y a pas de serveur central. N'importe qui peut faire tourner un service de rendez-vous, et le plugin parle à <strong>tous les services de votre liste</strong> à la fois (<span class="ui">Réglages › Réseau › Services de rendez-vous</span>).</p>
+      <p>Il n'y a pas de serveur central. N'importe qui peut faire tourner un service de rendez-vous, et le plugin parle à <strong>tous les services de la liste</strong> à la fois (<span class="ui">Réglages › Réseau › Services de rendez-vous</span>).</p>
       <figure class="fig">
         <svg viewBox="0 0 600 220" role="img" aria-label="Trois services A, B et C. Alice utilise A et B, Bob utilise B, Chloé utilise C.">
           <defs>
@@ -415,11 +415,11 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
         <figcaption>Alice et Bob partagent le service B, donc ils se voient. Chloé n'en partage aucun avec eux.</figcaption>
       </figure>
       <ul>
-        <li><strong>Vous voyez les joueurs avec qui vous partagez au moins un service.</strong></li>
+        <li><strong>Deux joueurs se voient s'ils partagent au moins un service.</strong></li>
         <li><strong>Un pairage survit à la perte d'un serveur.</strong> Chaque paire retient les services des deux côtés au moment du pairage, et s'annonce sur tous en parallèle ; le premier qui apparie gagne.</li>
-        <li><strong>Les serveurs s'ignorent.</strong> Aucun n'en interroge, n'en relaie ni ne répond pour un autre. C'est voulu : si les serveurs répondaient les uns pour les autres, un serveur ajouté en douce par votre opérateur pourrait revendiquer la boîte de quelqu'un et s'intercaler dans ses pairages.</li>
-        <li><strong>Les annuaires informent, ils ne décident jamais.</strong> Un service peut publier la liste de ceux qu'il connaît. Le bouton d'actualisation à côté d'un service de votre liste l'affiche, et rien n'est ajouté tant que vous ne cochez pas. Un nouveau service peut demander à y figurer, et attend qu'un humain l'approuve.</li>
-        <li><strong>Le prix.</strong> Chaque service actif apprend que votre personnage est en ligne et qui se tient autour de vous. Plus de services, c'est plus de monde à voir, et plus d'opérateurs qui savent. Gardez la liste courte.</li>
+        <li><strong>Les serveurs s'ignorent.</strong> Aucun n'en interroge, n'en relaie ni ne répond pour un autre. C'est voulu : si les serveurs répondaient les uns pour les autres, un serveur ajouté en douce par un opérateur pourrait revendiquer la boîte de quelqu'un et s'intercaler dans ses pairages.</li>
+        <li><strong>Les annuaires informent, ils ne décident jamais.</strong> Un service peut publier la liste de ceux qu'il connaît. Le bouton d'actualisation à côté d'un service de la liste l'affiche, et rien n'est ajouté sans une case cochée. Un nouveau service peut demander à y figurer, et attend qu'un humain l'approuve.</li>
+        <li><strong>Le prix.</strong> Chaque service actif apprend que le personnage est en ligne et qui se tient autour. Plus de services, c'est plus de monde à voir, et plus d'opérateurs qui savent. Mieux vaut garder la liste courte.</li>
       </ul>
     </div>
   </section>
@@ -503,19 +503,19 @@ sudo systemctl restart lprdv</code></pre>
       <p>Every option is documented in the <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous">rendezvous repository</a> (and in <code>lprdv --help</code>, in French).</p>
     </div>
     <div data-v="fr">
-      <h2>Héberger votre propre rendez-vous</h2>
-      <h3>Pourquoi héberger le vôtre</h3>
+      <h2>Héberger son propre rendez-vous</h2>
+      <h3>Pourquoi auto-héberger</h3>
       <ul>
-        <li><strong>L'opérateur est l'un des vôtres.</strong> La seule vraie faiblesse du protocole, un service qui s'intercale au moment du pairage, disparaît : personne d'autre ne se tient entre vous.</li>
-        <li><strong>Les métadonnées de votre cercle restent dans le cercle.</strong> Qui est en ligne, qui est pairé avec qui, les adresses IP : votre serveur les voit, un service public non.</li>
-        <li><strong>Vous ne dépendez de personne.</strong> Si le service public tombe ou ferme, votre cercle continue de se voir.</li>
-        <li><strong>Les relais passent par un serveur que vous avez choisi</strong>, proche de vous si vous voulez, avec une bande passante que vous connaissez.</li>
+        <li><strong>L'opérateur fait partie du cercle.</strong> La seule vraie faiblesse du protocole, un service qui s'intercale au moment du pairage, disparaît : personne d'autre ne se tient entre les pairs.</li>
+        <li><strong>Les métadonnées du cercle restent dans le cercle.</strong> Qui est en ligne, qui est pairé avec qui, les adresses IP : le serveur du cercle les voit, un service public non.</li>
+        <li><strong>Aucune dépendance.</strong> Si le service public tombe ou ferme, le cercle continue de se voir.</li>
+        <li><strong>Les relais passent par un serveur choisi</strong>, proche des joueurs si besoin, avec une bande passante connue.</li>
       </ul>
-      <p class="note"><strong>Une condition pour les deux premiers points</strong> : pairez-vous avec votre service seul dans la liste. Une demande de pairage passe par tous les services de la liste, et la paire s'annonce ensuite sur chacun. Vous pourrez rajouter le service public après, pour croiser des joueurs hors du cercle : les pairages déjà formés ne s'y annonceront pas, mais il vous verra en ligne si vous restez détectable.</p>
-      <p><strong>Ce que ça coûte</strong> : un petit serveur et quelques minutes d'installation, détaillés ci-dessous. Et celui qui le fait tourner voit ce que voit un service : choisissez quelqu'un en qui le cercle a confiance.</p>
+      <p class="note"><strong>Une condition pour les deux premiers points</strong> : se pairer avec le service du cercle seul dans la liste. Une demande de pairage passe par tous les services de la liste, et la paire s'annonce ensuite sur chacun. Le service public peut être rajouté ensuite, pour croiser des joueurs hors du cercle : les pairages déjà formés ne s'y annonceront pas, mais il verra le personnage en ligne s'il reste détectable.</p>
+      <p><strong>Ce que ça coûte</strong> : un petit serveur et quelques minutes d'installation, détaillés ci-dessous. Et qui le fait tourner voit ce que voit un service : mieux vaut quelqu'un en qui le cercle a confiance.</p>
       <p>Le service est un seul binaire autonome, <code>lprdv</code>. Il n'a besoin ni du runtime .NET ni de base de données.</p>
-      <p><strong>Il vous faut</strong> un serveur Linux x86-64 avec une adresse IP publique et systemd (un petit VPS suffit ; l'unité fournie plafonne le service à 512 Mo de mémoire), un accès SSH avec sudo, et un port ouvert en <strong>TCP et en UDP</strong>, 47900 par défaut.</p>
-      <p><strong>La bande passante</strong> : mettre les pairs en relation ne coûte presque rien. C'est le relais qui coûte : deux joueurs qui ne peuvent pas se connecter directement font passer toute leur apparence, souvent des centaines de mégaoctets, par votre serveur.</p>
+      <p><strong>Il faut</strong> un serveur Linux x86-64 avec une adresse IP publique et systemd (un petit VPS suffit ; l'unité fournie plafonne le service à 512 Mo de mémoire), un accès SSH avec sudo, et un port ouvert en <strong>TCP et en UDP</strong>, 47900 par défaut.</p>
+      <p><strong>La bande passante</strong> : mettre les pairs en relation ne coûte presque rien. C'est le relais qui coûte : deux joueurs qui ne peuvent pas se connecter directement font passer toute leur apparence, souvent des centaines de mégaoctets, par le serveur.</p>
       <ol class="steps">
         <li>
           <h3>Installer le service</h3>
@@ -537,28 +537,28 @@ sudo systemctl enable --now lprdv</code></pre>
         </li>
         <li>
           <h3>Ouvrir le port</h3>
-          <p>En TCP et en UDP, sur le serveur et dans le pare-feu de votre hébergeur s'il en a un.</p>
+          <p>En TCP et en UDP, sur le serveur et dans le pare-feu de l'hébergeur s'il en a un.</p>
 <pre><code>sudo ufw allow 47900</code></pre>
         </li>
         <li>
           <h3>Vérifier qu'il tourne</h3>
-          <p>Ceci doit afficher <code>200</code>. Le journal ne contient jamais d'adresse IP, sauf si vous lancez le service avec <code>--verbose</code>.</p>
+          <p>Ceci doit afficher <code>200</code>. Le journal ne contient jamais d'adresse IP, sauf si le service est lancé avec <code>--verbose</code>.</p>
 <pre><code>curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:47901/healthz
 journalctl -u lprdv -f</code></pre>
         </li>
         <li>
           <h3>L'ajouter dans le plugin</h3>
-          <p>En jeu : <span class="ui">Réglages › Réseau › Services de rendez-vous</span>, tapez l'adresse de votre serveur (<code>rdv.exemple.fr</code>, ou <code>rdv.exemple.fr:47900</code> si vous avez changé le port), puis <span class="ui">Ajouter</span>. Chaque ami fait de même. Gardez le service par défaut dans la liste si vous voulez continuer à voir les joueurs hors de votre cercle.</p>
+          <p>En jeu : <span class="ui">Réglages › Réseau › Services de rendez-vous</span>, saisir l'adresse du serveur (<code>rdv.exemple.fr</code>, ou <code>rdv.exemple.fr:47900</code> si le port a changé), puis <span class="ui">Ajouter</span>. Chaque ami fait de même. Garder le service par défaut dans la liste permet de continuer à voir les joueurs hors du cercle.</p>
         </li>
         <li>
           <h3>Ouvrir la console (facultatif)</h3>
-          <p>La console montre la santé du service, ses compteurs et leur historique, et permet d'approuver les candidatures à l'annuaire. Elle ne répond qu'au serveur lui-même : passez par un tunnel SSH, ouvrez <code>http://localhost:47901</code>, et connectez-vous avec n'importe quel identifiant et le jeton comme mot de passe.</p>
-<pre><code>ssh -L 47901:127.0.0.1:47901 vous@votre-serveur
+          <p>La console montre la santé du service, ses compteurs et leur historique, et permet d'approuver les candidatures à l'annuaire. Elle ne répond qu'au serveur lui-même : passer par un tunnel SSH, ouvrir <code>http://localhost:47901</code>, et se connecter avec n'importe quel identifiant et le jeton comme mot de passe.</p>
+<pre><code>ssh -L 47901:127.0.0.1:47901 utilisateur@serveur
 sudo cat /var/lib/lprdv/admin.token</code></pre>
         </li>
         <li>
           <h3>Rejoindre la fédération (facultatif)</h3>
-          <p>Pour que vos utilisateurs découvrent d'autres services, listez-les dans <code>/var/lib/lprdv/peers.txt</code>, une ligne <code>adresse&nbsp;&nbsp;libellé</code> par service. Le fichier est relu à chaud. Pour figurer dans l'annuaire d'un autre service, portez-vous candidat une fois au démarrage ; son opérateur décide.</p>
+          <p>Pour que les utilisateurs découvrent d'autres services, les lister dans <code>/var/lib/lprdv/peers.txt</code>, une ligne <code>adresse&nbsp;&nbsp;libellé</code> par service. Le fichier est relu à chaud. Pour figurer dans l'annuaire d'un autre service, il suffit de s'y porter candidat au démarrage ; son opérateur décide.</p>
 <pre><code>sudo systemctl edit lprdv</code></pre>
           <p>Puis, dans l'éditeur qui s'ouvre :</p>
 <pre><code>[Service]
@@ -567,12 +567,12 @@ ExecStart=/opt/lprdv/lprdv --port 47900 --announce-to annuaire.exemple.fr --publ
         </li>
         <li>
           <h3>Mettre à jour</h3>
-          <p>Téléchargez et vérifiez le nouveau binaire comme à l'étape 1, puis :</p>
+          <p>Télécharger et vérifier le nouveau binaire comme à l'étape 1, puis :</p>
 <pre><code>sudo install -m 0755 /tmp/lprdv /opt/lprdv/lprdv
 sudo systemctl restart lprdv</code></pre>
         </li>
       </ol>
-      <p><strong>Sauvegardez <code>/var/lib/lprdv</code>.</strong> Il contient vos réglages, votre annuaire, et la liste de bannissement avec son sel, qui ne se reconstruit pas. Rien de vos utilisateurs n'y est stocké.</p>
+      <p><strong>Sauvegarder <code>/var/lib/lprdv</code>.</strong> Il contient les réglages, l'annuaire, et la liste de bannissement avec son sel, qui ne se reconstruit pas. Rien des utilisateurs n'y est stocké.</p>
       <p class="note"><strong>Modération.</strong> La console tient une liste de personnages bannis, publiée sous forme d'empreintes lentes sur <code>/api/bans</code> pour qu'elle ne puisse pas servir d'annuaire des joueurs moddés. Le plugin n'applique pas encore ces listes.</p>
       <p>Toutes les options sont décrites dans le <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous">dépôt du rendez-vous</a> et dans <code>lprdv --help</code>.</p>
     </div>
