@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Linkpearl Sync, host a rendezvous</title>
+<meta name="description" content="Install a Linkpearl Sync rendezvous service on your own server in one command.">
+<meta name="theme-color" content="#07123a">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Linkpearl Sync, host a rendezvous">
+<meta property="og:description" content="Install a rendezvous service on your own server in one command.">
+<meta property="og:url" content="https://linkpearl-sync.github.io/heberger.html">
+<meta property="og:image" content="https://linkpearl-sync.github.io/assets/banner.png">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:ital,wght@0,400;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* La nuit du site ; ici un formulaire court et la commande qu'il écrit. */
+:root{
+  color-scheme:dark;
+  --ink:#eaf1ff; --mute:#a9b8e6; --faint:#7f8dc0; --glow:#5fb4ff; --deep:#07123a; --pom:#ffa45c; --field:#040b26;
+  --bad:#ff8f7e;
+  --line:rgba(143,196,255,.22); --card:rgba(255,255,255,.05);
+  --display:"Fredoka","Nunito",ui-rounded,system-ui,sans-serif;
+  --body:"Nunito",ui-rounded,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--deep)}
+body{
+  margin:0;min-height:100vh;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;
+  background:
+    radial-gradient(ellipse 70% 420px at 50% 0,#1a3590 0%,transparent 70%),
+    linear-gradient(180deg,var(--deep) 0,#081650 60%,var(--deep) 100%);
+  padding-inline:16px;padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(48px + env(safe-area-inset-bottom,0px));
+}
+.page{max-width:760px;margin-inline:auto;display:grid;gap:32px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.home{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-family:var(--display);font-weight:600;font-size:1.05rem}
+.home img{width:36px;height:36px}
+.home:hover span{color:var(--pom)}
+.langs{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:rgba(4,11,38,.6);border:1px solid var(--line)}
+.langs button{font:inherit;font-size:.82rem;font-weight:700;color:var(--mute);background:transparent;border:0;border-radius:999px;padding:4px 11px;cursor:pointer}
+.langs button:hover{color:var(--ink)}
+.langs button[aria-pressed="true"]{color:var(--ink);background:rgba(95,180,255,.18);box-shadow:0 0 0 1px var(--glow) inset}
+.langs button:focus-visible,.copy:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.only{margin:0;padding:10px 14px;border-radius:12px;background:rgba(255,164,92,.1);border:1px solid rgba(255,164,92,.4);font-size:.92rem}
+
+/* Bascule de langue : sans script, l'anglais seul s'affiche. */
+html:not([data-l="fr"]) [data-v="fr"]{display:none}
+html[data-l="fr"] [data-v="en"]{display:none}
+
+h1{font-family:var(--display);font-weight:600;font-size:clamp(2rem,6vw,3rem);line-height:1.1;margin:0;text-wrap:balance}
+h1 em{font-style:normal;color:var(--pom);text-shadow:0 0 22px rgba(255,164,92,.45)}
+p{margin:0}
+.lead{color:var(--mute);font-size:1.05rem;margin-top:12px}
+a{color:var(--ink);text-decoration-color:rgba(234,241,255,.4);text-underline-offset:3px}
+a:hover{text-decoration-color:var(--pom)}
+.small{color:var(--faint);font-size:.9rem}
+
+form{display:grid;gap:18px;padding:20px 22px;border-radius:18px;border:1px solid var(--line);background:var(--card)}
+.field{display:grid;gap:6px}
+.field label{font-weight:800}
+.field .hint{color:var(--faint);font-size:.88rem}
+.field .error{color:var(--bad);font-size:.88rem;font-weight:700}
+input[type=text],input[type=number]{font:inherit;font-family:var(--mono);font-size:.92rem;color:var(--ink);background:var(--field);
+  border:1px solid rgba(95,180,255,.35);border-radius:12px;padding:9px 12px;width:100%}
+input[type=number]{max-width:10em}
+input[aria-invalid="true"]{border-color:var(--bad)}
+input::placeholder{color:#5c6a9c}
+.check{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.check input{margin-top:5px;accent-color:var(--pom);width:16px;height:16px;flex:none}
+.check > span{display:grid}
+.check b{font-weight:800}
+
+.out{display:grid;gap:10px}
+pre{position:relative;margin:0;padding:16px;padding-right:96px;border-radius:14px;background:var(--field);border:1px solid rgba(255,164,92,.55);
+  font-family:var(--mono);font-size:.86rem;line-height:1.6;color:#ffe2c7;max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere}
+pre[aria-disabled="true"]{opacity:.45}
+.copy{position:absolute;top:10px;right:10px;font:inherit;font-family:var(--body);font-size:.8rem;font-weight:800;cursor:pointer;
+  background:var(--pom);color:#2a1300;border:0;border-radius:999px;padding:5px 14px}
+.copy:disabled{cursor:not-allowed;opacity:.5}
+.links{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.92rem}
+
+footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var(--mute);font-size:.88rem;text-align:center}
+[hidden]{display:none !important}
+@media (max-width:560px){
+  body{font-size:16px}
+  pre{padding-right:16px;padding-top:44px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <a class="home" href="./"><img src="assets/logo.png" width="36" height="36" alt=""><span>Linkpearl Sync</span></a>
+    <nav class="langs" aria-label="Language">
+      <button type="button" data-lang="fr" lang="fr">Français</button>
+      <button type="button" data-lang="en" lang="en">English</button>
+      <button type="button" data-lang="de" lang="de">Deutsch</button>
+      <button type="button" data-lang="ja" lang="ja">日本語</button>
+    </nav>
+  </div>
+  <p class="only" id="only" hidden></p>
+
+  <header>
+    <div data-v="en">
+      <h1>Host a <em>rendezvous</em></h1>
+      <p class="lead">A Linux x86-64 server with systemd and a public address, the port open in TCP and UDP. One command, run on the server.</p>
+    </div>
+    <div data-v="fr">
+      <h1>Héberger un <em>rendez-vous</em></h1>
+      <p class="lead">Un serveur Linux x86-64 avec systemd et une adresse publique, le port ouvert en TCP et en UDP. Une commande, à lancer sur le serveur.</p>
+    </div>
+  </header>
+
+  <form id="form" novalidate>
+    <div class="field">
+      <label for="address" data-t="address">Public address</label>
+      <input type="text" id="address" autocomplete="off" spellcheck="false" placeholder="rdv.example.org">
+      <p class="hint" data-t="addressHint"></p>
+      <p class="error" id="address-error" hidden></p>
+    </div>
+    <div class="field">
+      <label for="label" data-t="label">Label</label>
+      <input type="text" id="label" autocomplete="off" maxlength="64">
+      <p class="hint" data-t="labelHint"></p>
+      <p class="error" id="label-error" hidden></p>
+    </div>
+    <div class="field">
+      <label for="port" data-t="port">Port</label>
+      <input type="number" id="port" min="1" max="65535" value="47900">
+      <p class="error" id="port-error" hidden></p>
+    </div>
+    <label class="check"><input type="checkbox" id="announce" checked><span><b data-t="announce">Join the open circle</b><span class="small" data-t="announceHint"></span></span></label>
+    <label class="check"><input type="checkbox" id="firewall" checked><span><b data-t="firewall">Open the port in ufw or firewalld</b><span class="small" data-t="firewallHint"></span></span></label>
+  </form>
+
+  <section class="out">
+    <pre id="command" aria-live="polite"><code></code><button type="button" class="copy" id="copy"></button></pre>
+    <p class="small" data-t="after"></p>
+    <p class="links"><a href="install.sh" data-t="readScript">Read the script</a><a href="expert.html#self-host" data-t="manual">Step by step instead</a><a href="reseau.html" data-t="network">The open circle</a></p>
+  </section>
+
+  <footer>
+    <a href="./" data-i18n="home">Home</a>
+    <a href="expert.html" data-i18n="expert">Under the hood</a>
+    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous" data-i18n="rdv">Rendezvous source</a>
+    <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/issues" data-i18n="bug">Report a problem</a>
+  </footer>
+</div>
+<script>
+// Anglais et français seulement, comme la page technique : une commande
+// système mal expliquée coûte plus cher qu'un texte non traduit.
+const LANGS = ["ja", "en", "de", "fr"];
+const CHROME = {
+  en: { home: "Home", expert: "Under the hood", rdv: "Rendezvous source", bug: "Report a problem", copy: "Copy", copied: "Copied ✓", only: "" },
+  fr: { home: "Accueil", expert: "Sous le capot", rdv: "Code du rendez-vous", bug: "Signaler un problème", copy: "Copier", copied: "Copié ✓", only: "" },
+  de: { home: "Startseite", expert: "Technik (Englisch)", rdv: "Quellcode des Rendezvous-Dienstes", bug: "Problem melden", copy: "Kopieren", copied: "Kopiert ✓",
+        only: "Diese Seite gibt es nur auf Englisch und Französisch. Hier die englische Fassung." },
+  ja: { home: "ホーム", expert: "仕組み（英語）", rdv: "ランデブーサーバーのソースコード", bug: "不具合を報告", copy: "コピー", copied: "コピーしました ✓",
+        only: "このページは英語とフランス語のみです。英語版を表示しています。" },
+};
+
+const TEXT = {
+  en: {
+    address: "Public address", addressHint: "A name or an IPv4 address. Empty: the open circle takes the IPv4 address the server connects from.",
+    label: "Label", labelHint: "Shown in the open circle. Optional.",
+    port: "Port",
+    announce: "Join the open circle", announceHint: "The server applies at startup, then every day.",
+    firewall: "Open the port in ufw or firewalld", firewallHint: "Your host's firewall panel, if it has one, is up to you.",
+    after: "Running the same command again updates the service; without options, it keeps the ones already set. /var/lib/lprdv is never touched.",
+    readScript: "Read the script", manual: "Step by step instead", network: "The open circle",
+    badAddress: "A name or an IPv4 address, optionally followed by :port.",
+    badLabel: "No quote, backslash, $, % or backtick.",
+    badPort: "Between 1 and 65535, except 47901 (the console).",
+  },
+  fr: {
+    address: "Adresse publique", addressHint: "Un nom ou une adresse IPv4. Vide : le cercle ouvert retient l'adresse IPv4 d'où le serveur se connecte.",
+    label: "Libellé", labelHint: "Affiché dans le cercle ouvert. Facultatif.",
+    port: "Port",
+    announce: "Rejoindre le cercle ouvert", announceHint: "Le serveur se porte candidat au démarrage, puis chaque jour.",
+    firewall: "Ouvrir le port dans ufw ou firewalld", firewallHint: "Le pare-feu de l'hébergeur, s'il en a un, reste à régler soi-même.",
+    after: "Relancer la même commande met le service à jour ; sans option, elle garde celles déjà posées. /var/lib/lprdv n'est jamais touché.",
+    readScript: "Lire le script", manual: "Pas à pas plutôt", network: "Le cercle ouvert",
+    badAddress: "Un nom ou une adresse IPv4, éventuellement suivi de :port.",
+    badLabel: "Sans guillemet, barre oblique inverse, $, % ni accent grave.",
+    badPort: "Entre 1 et 65535, sauf 47901 (la console).",
+  },
+};
+
+const SCRIPT = "https://linkpearl-sync.github.io/install.sh";
+let lang = "en";
+
+function stored() { try { return localStorage.getItem("lang"); } catch { return null; } }
+function store(l) { try { localStorage.setItem("lang", l); } catch {} }
+
+function detect() {
+  const hash = location.hash.slice(1).toLowerCase();
+  if (LANGS.includes(hash)) return hash;
+  const saved = stored();
+  if (LANGS.includes(saved)) return saved;
+  for (const l of navigator.languages || [navigator.language || ""]) {
+    const base = l.slice(0, 2).toLowerCase();
+    if (LANGS.includes(base)) return base;
+  }
+  return "en";
+}
+
+const $ = id => document.getElementById(id);
+const text = () => TEXT[lang === "fr" ? "fr" : "en"];
+
+// Les mêmes règles que install.sh : la page ne propose jamais une commande
+// que le script refuserait.
+const checks = {
+  address: v => v === "" || /^[A-Za-z0-9._-]{1,253}(:[0-9]{1,5})?$/.test(v),
+  label: v => v.length <= 64 && !/["\\$%`\u0000-\u001f\u007f]/.test(v),
+  port: v => /^[0-9]+$/.test(v) && +v >= 1 && +v <= 65535 && +v !== 47901,
+};
+
+// Entre apostrophes pour le shell, qui n'y interprète rien ; une apostrophe
+// du libellé se ferme, s'échappe et se rouvre.
+function quote(value) {
+  return /^[A-Za-z0-9._:\/-]+$/.test(value) ? value : `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+function build() {
+  const address = $("address").value.trim();
+  const label = $("label").value.trim();
+  const port = $("port").value.trim();
+  const errors = {
+    address: !checks.address(address),
+    label: !checks.label(label),
+    port: !checks.port(port),
+  };
+  const t = text();
+  for (const [field, bad] of Object.entries(errors)) {
+    $(field).setAttribute("aria-invalid", String(bad));
+    const error = $(`${field}-error`);
+    error.hidden = !bad;
+    error.textContent = bad ? t[`bad${field[0].toUpperCase()}${field.slice(1)}`] : "";
+  }
+
+  const args = [];
+  if (port !== "47900") args.push("--port", port);
+  if (address) args.push("--public-address", address);
+  if (label) args.push("--label", quote(label));
+  if (!$("announce").checked) args.push("--no-announce");
+  if (!$("firewall").checked) args.push("--no-firewall");
+
+  const command = `curl -fsSL ${SCRIPT} | sudo bash` + (args.length ? ` -s -- ${args.join(" ")}` : "");
+  const valid = !Object.values(errors).some(Boolean);
+  $("command").querySelector("code").textContent = command;
+  $("command").setAttribute("aria-disabled", String(!valid));
+  $("copy").disabled = !valid;
+}
+
+function apply(l) {
+  lang = l;
+  const shown = l === "fr" ? "fr" : "en";
+  const root = document.documentElement;
+  root.lang = shown;
+  root.dataset.l = shown;
+  const c = CHROME[l];
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = c[el.dataset.i18n]; });
+  document.querySelectorAll("[data-t]").forEach(el => { el.textContent = text()[el.dataset.t]; });
+  $("copy").textContent = c.copy;
+  const only = $("only");
+  only.textContent = c.only;
+  only.hidden = !c.only;
+  if (c.only) only.lang = l; else only.removeAttribute("lang");
+  document.title = shown === "fr" ? "Linkpearl Sync, héberger un rendez-vous" : "Linkpearl Sync, host a rendezvous";
+  document.querySelectorAll(".langs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
+  build();
+}
+
+document.querySelectorAll(".langs button").forEach(b => b.addEventListener("click", () => {
+  store(b.dataset.lang);
+  apply(b.dataset.lang);
+}));
+addEventListener("hashchange", () => {
+  const hash = location.hash.slice(1).toLowerCase();
+  if (LANGS.includes(hash)) apply(hash);
+});
+$("form").addEventListener("input", build);
+$("form").addEventListener("submit", e => e.preventDefault());
+
+$("copy").addEventListener("click", () => {
+  const code = $("command").querySelector("code");
+  const select = () => {
+    const range = document.createRange();
+    range.selectNodeContents(code);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  };
+  if (!navigator.clipboard) { select(); return; }
+  navigator.clipboard.writeText(code.textContent).then(() => {
+    $("copy").textContent = CHROME[lang].copied;
+    setTimeout(() => { $("copy").textContent = CHROME[lang].copy; }, 1600);
+  }, select);
+});
+
+apply(detect());
+</script>
+</body>
+</html>

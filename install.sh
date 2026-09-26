@@ -64,6 +64,13 @@ if [ -n "$label" ]; then
   esac
 fi
 
+# Une adresse sans port se lit sur 47900 : avec un autre port, le service se
+# présenterait sous une adresse où personne ne répond.
+case "$public_address" in
+  ''|*:*) ;;
+  *) if [ "$port" -ne 47900 ]; then public_address="$public_address:$port"; fi ;;
+esac
+
 [ "$(id -u)" -eq 0 ] || die "à lancer avec sudo"
 [ "$(uname -s)" = Linux ] || die "Linux seulement"
 [ "$(uname -m)" = x86_64 ] || die "processeur $(uname -m) : seules les machines x86-64 ont un binaire publié"
@@ -126,7 +133,9 @@ systemctl restart lprdv
 
 for _ in $(seq 30); do
   if curl -fs -o /dev/null "http://127.0.0.1:$ADMIN_PORT/healthz"; then
-    shown=${public_address:-$(hostname -f 2>/dev/null || hostname)}
+    # Sans adresse donnée, on n'en devine pas : le nom de la machine est
+    # souvent un nom interne de l'hébergeur, que personne ne joindra.
+    shown=${public_address:-"<adresse publique de ce serveur>"}
     case "$shown" in
       *:*) ;;
       *) if [ "$port" -ne 47900 ]; then shown="$shown:$port"; fi ;;

@@ -5,7 +5,7 @@ servie par GitHub Pages sur <https://linkpearl-sync.github.io/>.
 
 Des pages statiques, sans outil de construction : `index.html` (l'accueil), `expert.html` (le
 fonctionnement, la fédération et le guide d'auto-hébergement), `reseau.html` (l'état du cercle
-ouvert) et leurs images dans `assets/`.
+ouvert), `heberger.html` (le générateur de commande d'installation) et leurs images dans `assets/`.
 Pousser sur `main` publie, par GitHub Actions.
 
 `expert.html` et `reseau.html` n'existent qu'en anglais et en français, comme les README du plugin : un texte
@@ -29,5 +29,14 @@ le plugin ou le rendez-vous change de comportement (connexion, relais, options d
   dans l'objet `T` du script de `index.html` ; le HTML statique porte l'anglais, qui sert aussi
   aux aperçus de lien. Langue retenue : `#ja` dans l'adresse, sinon le dernier choix, sinon celle
   du navigateur, sinon l'anglais.
+
+- `install.sh`, servi sur <https://linkpearl-sync.github.io/install.sh>, installe ou met à jour
+  un service de rendez-vous en une commande ; `heberger.html` écrit cette commande. Le script
+  prend la dernière release du rendez-vous, vérifiée par `lprdv.sha256`, qui couvre le binaire
+  et l'unité systemd, et pose les options dans un complément
+  (`/etc/systemd/system/lprdv.service.d/options.conf`). Les règles de validation sont les mêmes
+  dans les deux fichiers : en changer une, c'est changer l'autre.
+  `.github/workflows/install.yml` l'exécute pour de vrai sur un runner jetable, à chaque
+  modification et chaque lundi.
 
 Aperçu local : `python3 -m http.server` puis <http://localhost:8000> (sans `repo.json`).

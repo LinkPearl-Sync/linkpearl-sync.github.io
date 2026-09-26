@@ -444,22 +444,23 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       <p>The service is one self-contained binary, <code>lprdv</code>. It needs no .NET runtime and no database.</p>
       <p><strong>You need</strong> a Linux x86-64 server with a public IP address and systemd (a small VPS is enough; the provided unit caps the service at 512 MB of RAM), SSH access with sudo, and one port open in both <strong>TCP and UDP</strong>, 47900 by default.</p>
       <p><strong>Bandwidth</strong>: introducing peers costs almost nothing. Relaying is what costs: two players who can't connect directly send their whole appearance, often hundreds of megabytes, through your server.</p>
+      <p class="note"><strong>In one command.</strong> <a href="heberger.html">The generator</a> writes it for you: download, check, install, open the port and start. The steps below do the same by hand.</p>
       <ol class="steps">
         <li>
           <h3>Install the service</h3>
 <pre><code><span class="c"># system account that runs the service</span>
 sudo useradd --system --home-dir /var/lib/lprdv --shell /usr/sbin/nologin lprdv
 
-<span class="c"># latest release, checked against its published checksum</span>
+<span class="c"># latest release and its unit, checked against the published checksum</span>
 cd /tmp
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv
+curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.service
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.sha256
 sha256sum -c lprdv.sha256
 sudo install -D -m 0755 lprdv /opt/lprdv/lprdv
 
 <span class="c"># hardened systemd unit, restarts on its own</span>
-sudo curl -fLo /etc/systemd/system/lprdv.service \
-  https://raw.githubusercontent.com/LinkPearl-Sync/linkpearl-sync-rendezvous/main/deploy/lprdv.service
+sudo install -m 0644 lprdv.service /etc/systemd/system/lprdv.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now lprdv</code></pre>
         </li>
@@ -496,7 +497,7 @@ ExecStart=/opt/lprdv/lprdv --port 47900 --public-address rdv.example.org --label
         </li>
         <li>
           <h3>Update</h3>
-          <p>Download and check the new binary as in step 1, then:</p>
+          <p>Rerun the <a href="heberger.html">generator</a>'s command, which keeps your options, or download and check the new binary as in step 1, then:</p>
 <pre><code>sudo install -m 0755 /tmp/lprdv /opt/lprdv/lprdv
 sudo systemctl restart lprdv</code></pre>
         </li>
@@ -519,22 +520,23 @@ sudo systemctl restart lprdv</code></pre>
       <p>Le service est un seul binaire autonome, <code>lprdv</code>. Il n'a besoin ni du runtime .NET ni de base de données.</p>
       <p><strong>Il faut</strong> un serveur Linux x86-64 avec une adresse IP publique et systemd (un petit VPS suffit ; l'unité fournie plafonne le service à 512 Mo de mémoire), un accès SSH avec sudo, et un port ouvert en <strong>TCP et en UDP</strong>, 47900 par défaut.</p>
       <p><strong>La bande passante</strong> : mettre les pairs en relation ne coûte presque rien. C'est le relais qui coûte : deux joueurs qui ne peuvent pas se connecter directement font passer toute leur apparence, souvent des centaines de mégaoctets, par le serveur.</p>
+      <p class="note"><strong>En une commande.</strong> <a href="heberger.html#fr">Le générateur</a> l'écrit pour vous : téléchargement, vérification, installation, ouverture du port et démarrage. Les étapes ci-dessous font la même chose à la main.</p>
       <ol class="steps">
         <li>
           <h3>Installer le service</h3>
 <pre><code><span class="c"># compte système qui fait tourner le service</span>
 sudo useradd --system --home-dir /var/lib/lprdv --shell /usr/sbin/nologin lprdv
 
-<span class="c"># dernière version, vérifiée contre son empreinte publiée</span>
+<span class="c"># dernière version et son unité, vérifiées contre l'empreinte publiée</span>
 cd /tmp
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv
+curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.service
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.sha256
 sha256sum -c lprdv.sha256
 sudo install -D -m 0755 lprdv /opt/lprdv/lprdv
 
 <span class="c"># unité systemd durcie, qui redémarre seule</span>
-sudo curl -fLo /etc/systemd/system/lprdv.service \
-  https://raw.githubusercontent.com/LinkPearl-Sync/linkpearl-sync-rendezvous/main/deploy/lprdv.service
+sudo install -m 0644 lprdv.service /etc/systemd/system/lprdv.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now lprdv</code></pre>
         </li>
@@ -571,7 +573,7 @@ ExecStart=/opt/lprdv/lprdv --port 47900 --public-address rdv.exemple.fr --label 
         </li>
         <li>
           <h3>Mettre à jour</h3>
-          <p>Télécharger et vérifier le nouveau binaire comme à l'étape 1, puis :</p>
+          <p>Relancer la commande du <a href="heberger.html#fr">générateur</a>, qui garde les options, ou télécharger et vérifier le nouveau binaire comme à l'étape 1, puis :</p>
 <pre><code>sudo install -m 0755 /tmp/lprdv /opt/lprdv/lprdv
 sudo systemctl restart lprdv</code></pre>
         </li>
