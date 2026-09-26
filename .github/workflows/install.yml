@@ -1,0 +1,61 @@
+name: Essayer install.sh
+
+# Le script d'installation part chez des inconnus en une ligne : on le fait
+# tourner pour de vrai sur une machine jetable, avec systemd et sudo. Chaque
+# semaine aussi, parce qu'il dépend de la dernière release du rendez-vous,
+# qui peut changer sans que ce dépôt bouge.
+on:
+  push:
+    paths: [install.sh, .github/workflows/install.yml]
+  pull_request:
+    paths: [install.sh, .github/workflows/install.yml]
+  workflow_dispatch:
+  schedule:
+    - cron: '41 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+
+      - name: shellcheck
+        run: shellcheck install.sh
+
+      - name: Refuse ce qu'il doit refuser
+        run: |
+          set +e
+          for bad in "--port abc" "--port 47901" "--public-address x/y" "--bof"; do
+            # shellcheck disable=SC2086
+            if sudo bash install.sh $bad; then echo "accepté à tort : $bad"; exit 1; fi
+          done
+          if sudo bash install.sh --label 'a$(id)'; then echo 'libellé accepté à tort'; exit 1; fi
+          test ! -e /opt/lprdv/lprdv
+
+      - name: Première installation
+        run: sudo bash install.sh --port 47910 --label "Essai de l'intégration" --no-announce --no-firewall
+
+      - name: Le service tourne avec ses options
+        run: |
+          systemctl is-active lprdv
+          systemctl show lprdv -p ExecStart --value | tee /dev/stderr | grep -q -- "--label Essai de l'intégration"
+          systemctl show lprdv -p ExecStart --value | grep -q -- '--no-announce'
+          ss -ltn | grep -q ':47910 '
+          sudo test -s /var/lib/lprdv/admin.token
+
+      - name: Relancé sans option, il met à jour et garde tout
+        run: |
+          token=$(sudo cat /var/lib/lprdv/admin.token)
+          sudo bash install.sh --no-firewall | tee out.txt
+          grep -q 'Options inchangées' out.txt
+          grep -q ':47910' out.txt
+          systemctl show lprdv -p ExecStart --value | grep -q -- '--port 47910'
+          test "$token" = "$(sudo cat /var/lib/lprdv/admin.token)"
+
+      - name: Journal en cas d'échec
+        if: failure()
+        run: sudo journalctl -u lprdv -n 50 --no-pager

@@ -61,7 +61,7 @@ jobs:
           # retirerait le plugin de la liste de tous les joueurs.
           jq -e 'type == "array" and length > 0 and all(.[]; .InternalName and .AssemblyVersion and .DownloadLinkInstall)' plugin/repo.json > /dev/null
           mkdir out
-          cp -r site/*.html site/assets site/.nojekyll out/
+          cp -r site/*.html site/install.sh site/assets site/.nojekyll out/
           cp plugin/repo.json out/repo.json
           # L'instantané public du réseau ; en panne, le dernier publié.
           python3 site/scripts/reseau.py out/reseau.json
