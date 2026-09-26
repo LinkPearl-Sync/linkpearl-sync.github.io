@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Linkpearl Sync, the open circle</title>
-<meta name="description" content="The rendezvous services of Linkpearl Sync's open circle: who runs them, since when, how available they are, and how to join.">
+<meta name="description" content="The rendezvous services of Linkpearl Sync's open circle: who runs them, since when, and how available they are.">
 <meta name="theme-color" content="#07123a">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Linkpearl Sync, the open circle">
-<meta property="og:description" content="The public state of the open circle: listed services, services on probation, and how to join.">
+<meta property="og:description" content="The public state of the open circle: listed services and services on probation.">
 <meta property="og:url" content="https://linkpearl-sync.github.io/reseau.html">
 <meta property="og:image" content="https://linkpearl-sync.github.io/assets/banner.png">
 <link rel="icon" type="image/png" href="assets/logo.png">
@@ -45,7 +45,7 @@ body{
 .langs button{font:inherit;font-size:.82rem;font-weight:700;color:var(--mute);background:transparent;border:0;border-radius:999px;padding:4px 11px;cursor:pointer}
 .langs button:hover{color:var(--ink)}
 .langs button[aria-pressed="true"]{color:var(--ink);background:rgba(95,180,255,.18);box-shadow:0 0 0 1px var(--glow) inset}
-.langs button:focus-visible,.copy:focus-visible,a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.langs button:focus-visible,a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .only{margin:0;padding:10px 14px;border-radius:12px;background:rgba(255,164,92,.1);border:1px solid rgba(255,164,92,.4);font-size:.92rem}
 
 /* Bascule de langue : sans script, l'anglais seul s'affiche. */
@@ -55,7 +55,6 @@ html[data-l="fr"] [data-v="en"]{display:none}
 .hero{display:grid;gap:14px}
 h1{font-family:var(--display);font-weight:600;font-size:clamp(2rem,6vw,3rem);line-height:1.1;margin:0;text-wrap:balance}
 h1 em{font-style:normal;color:var(--glow);text-shadow:0 0 22px rgba(95,180,255,.55)}
-.lead{margin:0;color:var(--mute);font-size:1.08rem}
 p{margin:0}
 a{color:var(--ink);text-decoration-color:rgba(234,241,255,.4);text-underline-offset:3px}
 a:hover{text-decoration-color:var(--pom)}
@@ -66,7 +65,6 @@ code{font-family:var(--mono);font-size:.86em;background:rgba(4,11,38,.7);border:
 section{display:grid;gap:14px}
 h2{font-family:var(--display);font-weight:600;font-size:1.5rem;line-height:1.2;margin:0;display:flex;align-items:center;gap:12px;text-wrap:balance}
 h2::before{content:"";width:14px;height:14px;flex:none;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 16%,#bfe4ff 30%,#7a9cff 60%,#c79bff 100%);box-shadow:0 0 12px #7ec3ff}
-#join h2::before{background:radial-gradient(circle at 35% 30%,#fff5ea 0 14%,#ffc58f 40%,#ff9344 85%);box-shadow:0 0 12px rgba(255,160,90,.8)}
 
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
 .stat{padding:14px 18px;border-radius:18px;border:1px solid var(--line);background:var(--card)}
@@ -104,19 +102,6 @@ td.num,th.num{font-variant-numeric:tabular-nums;text-align:right;white-space:now
 .pcard .facts{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px;color:var(--mute);font-size:.9rem}
 .pcard .facts .below{color:var(--pom);font-weight:700}
 
-.anchor{display:grid;gap:12px}
-.acard{display:grid;gap:8px;padding:14px 18px;border-radius:18px;border:1px dashed var(--line);background:rgba(4,11,38,.35)}
-.acard .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
-.acard .label{font-weight:800}
-.acard .addr{font-family:var(--mono);font-size:.84rem;color:#cfe6ff;overflow-wrap:anywhere}
-.acard p{color:var(--mute);font-size:.95rem}
-.join{display:grid;gap:12px;padding:18px 20px;border-radius:18px;border:1px solid rgba(255,164,92,.35);background:rgba(255,164,92,.06)}
-.join ul{margin:0;padding-left:1.3em;display:grid;gap:6px}
-pre{position:relative;margin:0;padding:14px 16px;padding-right:86px;border-radius:14px;background:var(--field);border:1px solid rgba(95,180,255,.45);
-  overflow-x:auto;font-family:var(--mono);font-size:.84rem;line-height:1.6;color:#cfe6ff;max-width:100%}
-pre code{background:none;border:0;padding:0;font-size:inherit;overflow-wrap:normal}
-.copy{position:absolute;top:8px;right:8px;font:inherit;font-family:var(--body);font-size:.78rem;font-weight:800;cursor:pointer;
-  background:var(--pom);color:#2a1300;border:0;border-radius:999px;padding:4px 12px}
 
 .key{display:grid;gap:10px;padding:16px 20px;border-radius:18px;border:1px solid var(--line);background:var(--card)}
 .key dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 18px}
@@ -131,7 +116,6 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
 [hidden]{display:none !important}
 @media (max-width:560px){
   body{font-size:16px}
-  pre{padding-right:16px;padding-top:40px}
   .key dl{grid-template-columns:1fr}
   /* En colonne étroite, chaque service devient une petite fiche : nom et
      disponibilité en tête, puis l'adresse entière, puis la date. */
@@ -162,11 +146,9 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
   <header class="hero">
     <div data-v="en">
       <h1>The open <em>circle</em></h1>
-      <p class="lead">Rendezvous services run by volunteers, admitted automatically once they have proven reliable. The plugin spreads your pairings across them. This page shows who they are, how they are doing, and how to join.</p>
     </div>
     <div data-v="fr">
       <h1>Le cercle <em>ouvert</em></h1>
-      <p class="lead">Des services de rendez-vous tenus par des bénévoles, admis d'office une fois leur fiabilité prouvée. Le plugin y répartit les pairages. Cette page dit qui ils sont, comment ils se portent, et comment les rejoindre.</p>
     </div>
   </header>
 
@@ -193,66 +175,18 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
     </div>
   </section>
 
-  <!-- Écrit à la main, pas tiré de reseau.json : l'autorité ne connaît que le
-       cercle ouvert. Recopier RendezvousList.DefaultHost si le plugin change. -->
-  <section id="anchor">
-    <div data-v="en" class="anchor">
-      <h2>The anchor circle</h2>
-      <div class="acard">
-        <div class="head"><span class="label">Linkpearl</span><span class="addr">rdv.linkpearl.eorzea.events:47900</span></div>
-        <p>Shipped with the plugin, and the one every first contact goes through: it is not in the open circle, on purpose. A service in both circles could pair a client with itself. It also runs the authority that signs the open circle's list.</p>
-      </div>
-      <p class="small">Services you add yourself in the plugin settings belong to your anchor circle too, and never show up here.</p>
-    </div>
-    <div data-v="fr" class="anchor">
-      <h2>Le cercle d'ancrage</h2>
-      <div class="acard">
-        <div class="head"><span class="label">Linkpearl</span><span class="addr">rdv.linkpearl.eorzea.events:47900</span></div>
-        <p>Distribué avec le plugin, c'est par lui que passent tous les premiers contacts : il n'est pas dans le cercle ouvert, et c'est voulu. Un service présent dans les deux cercles pourrait apparier un client avec lui-même. C'est aussi lui qui tient l'autorité qui signe la liste du cercle ouvert.</p>
-      </div>
-      <p class="small">Les services ajoutés à la main dans les réglages du plugin font eux aussi partie du cercle d'ancrage, et n'apparaissent jamais ici.</p>
-    </div>
-  </section>
-
   <section id="probation" hidden>
     <h2><span data-t="probationTitle">On probation</span></h2>
-    <p class="small" data-t="probationHint"></p>
     <div class="pcards" id="probation-cards"></div>
   </section>
 
   <section id="delisted" hidden>
     <h2><span data-t="delistedTitle">Recently left</span></h2>
-    <p class="small" data-t="delistedHint"></p>
     <div class="tbl">
       <table>
         <thead><tr><th data-t="label">Name</th><th data-t="address">Address</th><th data-t="left">Left</th><th class="num" data-t="lastSeen">Last answer</th></tr></thead>
         <tbody id="delisted-rows"></tbody>
       </table>
-    </div>
-  </section>
-
-  <section id="join">
-    <div data-v="en" class="join">
-      <h2>Join the open circle</h2>
-      <p>Host a rendezvous service (see <a href="expert.html#self-host">host your own</a>), then add these two options to its command line:</p>
-      <pre><code>lprdv --announce-to rdv.linkpearl.eorzea.events --public-address &lt;your address&gt;</code></pre>
-      <ul>
-        <li>The service applies at startup, then once a day. Nothing to fill in, nobody to write to.</li>
-        <li>The authority probes it every ten minutes. It shows up above, on probation, once it answers from the address that applied.</li>
-        <li>After 72 hours at 95 % or more, it joins the signed list. At most two services per network (/24 or /48), and five new ones per day.</li>
-        <li>The operator of the authority can still set a service aside; it then disappears from this page.</li>
-      </ul>
-    </div>
-    <div data-v="fr" class="join">
-      <h2>Rejoindre le cercle ouvert</h2>
-      <p>Héberger un service de rendez-vous (voir <a href="expert.html#self-host">héberger son propre rendez-vous</a>), puis ajouter ces deux options à sa ligne de commande :</p>
-      <pre><code>lprdv --announce-to rdv.linkpearl.eorzea.events --public-address &lt;votre adresse&gt;</code></pre>
-      <ul>
-        <li>Le service se porte candidat au démarrage, puis une fois par jour. Rien à remplir, personne à qui écrire.</li>
-        <li>L'autorité le sonde toutes les dix minutes. Il apparaît plus haut, en probation, dès qu'il répond depuis l'adresse qui a posé la candidature.</li>
-        <li>Après 72 heures à 95 % ou plus, il entre dans la liste signée. Deux services au plus par réseau (/24 ou /48), et cinq nouveaux par jour.</li>
-        <li>L'opérateur de l'autorité peut toujours écarter un service ; il disparaît alors de cette page.</li>
-      </ul>
     </div>
   </section>
 
@@ -266,7 +200,6 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
         <dt data-t="fingerprint">Key fingerprint</dt><dd class="fp" id="fingerprint"></dd>
       </dl>
       <div id="key-more">
-        <p class="small" data-t="keyHint"></p>
         <details><summary data-t="fullKey">Full public key (P-256)</summary><code class="fp" id="public-key"></code></details>
       </div>
     </div>
@@ -284,11 +217,11 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
 // restant commun avec l'accueil.
 const LANGS = ["ja", "en", "de", "fr"];
 const CHROME = {
-  en: { home: "Home", expert: "Under the hood", rdv: "Rendezvous source", bug: "Report a problem", copy: "Copy", copied: "Copied ✓", only: "" },
-  fr: { home: "Accueil", expert: "Sous le capot", rdv: "Code du rendez-vous", bug: "Signaler un problème", copy: "Copier", copied: "Copié ✓", only: "" },
-  de: { home: "Startseite", expert: "Technik (Englisch)", rdv: "Quellcode des Rendezvous-Dienstes", bug: "Problem melden", copy: "Kopieren", copied: "Kopiert ✓",
+  en: { home: "Home", expert: "Under the hood", rdv: "Rendezvous source", bug: "Report a problem", only: "" },
+  fr: { home: "Accueil", expert: "Sous le capot", rdv: "Code du rendez-vous", bug: "Signaler un problème", only: "" },
+  de: { home: "Startseite", expert: "Technik (Englisch)", rdv: "Quellcode des Rendezvous-Dienstes", bug: "Problem melden",
         only: "Diese Seite gibt es nur auf Englisch und Französisch. Hier die englische Fassung." },
-  ja: { home: "ホーム", expert: "仕組み（英語）", rdv: "ランデブーサーバーのソースコード", bug: "不具合を報告", copy: "コピー", copied: "コピーしました ✓",
+  ja: { home: "ホーム", expert: "仕組み（英語）", rdv: "ランデブーサーバーのソースコード", bug: "不具合を報告",
         only: "このページは英語とフランス語のみです。英語版を表示しています。" },
 };
 
@@ -298,12 +231,9 @@ const TEXT = {
     listed: "Listed", onProbation: "On probation", candidates: "Candidates", delistedCount: "Recently left",
     listedTitle: "Listed services", probationTitle: "On probation", delistedTitle: "Recently left", authorityTitle: "The signed list",
     label: "Name", address: "Address", since: "Listed since", availability: "Last 24 h", left: "Left", lastSeen: "Last answer",
-    probationHint: "A service joins after 72 hours with at least 95 % of probes answered. A candidate only shows up here once it answers from the address that applied.",
-    delistedHint: "Out of the list after 24 hours without answering. Back within 72 hours, a service takes its place again; later, it starts its probation over. Forgotten after seven days.",
     issued: "Signed", expires: "Expires", fingerprint: "Key fingerprint", fullKey: "Full public key (P-256)",
-    keyHint: "The plugin only trusts a list signed by this key, which it carries in its source code. The list names services, nothing else: no player, no character.",
     unavailable: "Network status unavailable for now.",
-    empty: "The open circle is empty: everyone goes through the services they configured.",
+    empty: "No service listed yet.",
     noList: "No signed list issued yet.",
     snapshot: t => `Snapshot of ${t}`,
     stale: "More than three hours old: the authority may be unreachable.",
@@ -316,12 +246,9 @@ const TEXT = {
     listed: "Listés", onProbation: "En probation", candidates: "Candidats", delistedCount: "Sortis récemment",
     listedTitle: "Services listés", probationTitle: "En probation", delistedTitle: "Sortis récemment", authorityTitle: "La liste signée",
     label: "Nom", address: "Adresse", since: "Listé depuis", availability: "Sur 24 h", left: "Sorti le", lastSeen: "Dernière réponse",
-    probationHint: "Un service entre après 72 heures avec au moins 95 % de sondes réussies. Un candidat n'apparaît ici qu'une fois qu'il répond depuis l'adresse qui a posé la candidature.",
-    delistedHint: "Hors de la liste après 24 heures sans réponse. De retour dans les 72 heures, un service reprend sa place ; plus tard, il recommence sa probation. Oublié après sept jours.",
     issued: "Signée le", expires: "Expire le", fingerprint: "Empreinte de la clé", fullKey: "Clé publique complète (P-256)",
-    keyHint: "Le plugin ne fait confiance qu'à une liste signée par cette clé, qu'il porte dans son code source. La liste nomme des services, rien d'autre : ni joueur, ni personnage.",
     unavailable: "État du réseau indisponible pour l'instant.",
-    empty: "Le cercle ouvert est vide : chacun passe par ses services configurés.",
+    empty: "Aucun service listé.",
     noList: "Aucune liste signée émise.",
     snapshot: t => `Instantané du ${t}`,
     stale: "Vieux de plus de trois heures : l'autorité est peut-être injoignable.",
@@ -487,7 +414,6 @@ function apply(l) {
   root.dataset.l = shown;
   const c = CHROME[l];
   document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = c[el.dataset.i18n]; });
-  document.querySelectorAll(".copy").forEach(b => { b.textContent = c.copy; });
   const only = $("only");
   only.textContent = c.only;
   only.hidden = !c.only;
@@ -530,28 +456,6 @@ document.querySelectorAll(".langs button").forEach(b => b.addEventListener("clic
 addEventListener("hashchange", () => {
   const hash = location.hash.slice(1).toLowerCase();
   if (LANGS.includes(hash)) apply(hash);
-});
-
-document.querySelectorAll("pre").forEach(pre => {
-  const code = pre.querySelector("code");
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "copy";
-  btn.addEventListener("click", () => {
-    const select = () => {
-      const range = document.createRange();
-      range.selectNodeContents(code);
-      const sel = getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-    };
-    if (!navigator.clipboard) { select(); return; }
-    navigator.clipboard.writeText(code.textContent).then(() => {
-      btn.textContent = CHROME[lang].copied;
-      setTimeout(() => { btn.textContent = CHROME[lang].copy; }, 1600);
-    }, select);
-  });
-  pre.append(btn);
 });
 
 apply(detect());

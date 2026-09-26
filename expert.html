@@ -384,7 +384,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
         <li><strong>A pairing survives the loss of a server.</strong> Each pair remembers the services both sides used when pairing, and announces on all of them in parallel; the first match wins.</li>
         <li><strong>Servers ignore each other.</strong> None queries, relays for, or vouches for another. This is deliberate: if servers answered for each other, one your operator quietly added could claim someone's mailbox and slip into their pairings.</li>
         <li><strong>Directories inform, they never decide.</strong> A service can publish the list of services it knows. The refresh button next to a service in your list shows it, and nothing is added until you tick it. A new service can apply to be listed, and waits for a human to approve.</li>
-        <li><strong>The open circle.</strong> On top of the services you pick, the plugin can spread each pairing over two services run by volunteers. They are admitted automatically after 72 hours of reliable answers, on a list signed by a single authority that never sees a player. <a href="reseau.html">Who is in it, and how to join</a>.</li>
+        <li><strong>The open circle.</strong> On top of the services you pick, the plugin can spread each pairing over two services run by volunteers. They are admitted automatically after 72 hours of reliable answers, on a list signed by a single authority that never sees a player. <a href="reseau.html">Who is in it</a>.</li>
         <li><strong>The price.</strong> Each active service learns that your character is online and who is around you. More services means more people you can see, and more operators who know. Keep the list short.</li>
       </ul>
     </div>
@@ -420,7 +420,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
         <li><strong>Un pairage survit à la perte d'un serveur.</strong> Chaque paire retient les services des deux côtés au moment du pairage, et s'annonce sur tous en parallèle ; le premier qui apparie gagne.</li>
         <li><strong>Les serveurs s'ignorent.</strong> Aucun n'en interroge, n'en relaie ni ne répond pour un autre. C'est voulu : si les serveurs répondaient les uns pour les autres, un serveur ajouté en douce par un opérateur pourrait revendiquer la boîte de quelqu'un et s'intercaler dans ses pairages.</li>
         <li><strong>Les annuaires informent, ils ne décident jamais.</strong> Un service peut publier la liste de ceux qu'il connaît. Le bouton d'actualisation à côté d'un service de la liste l'affiche, et rien n'est ajouté sans une case cochée. Un nouveau service peut demander à y figurer, et attend qu'un humain l'approuve.</li>
-        <li><strong>Le cercle ouvert.</strong> En plus des services choisis, le plugin peut répartir chaque pairage sur deux services tenus par des bénévoles. Ils y entrent d'office après 72 heures de réponses fiables, sur une liste signée par une seule autorité qui ne voit aucun joueur. <a href="reseau.html#fr">Qui en fait partie, et comment le rejoindre</a>.</li>
+        <li><strong>Le cercle ouvert.</strong> En plus des services choisis, le plugin peut répartir chaque pairage sur deux services tenus par des bénévoles. Ils y entrent d'office après 72 heures de réponses fiables, sur une liste signée par une seule autorité qui ne voit aucun joueur. <a href="reseau.html#fr">Qui en fait partie</a>.</li>
         <li><strong>Le prix.</strong> Chaque service actif apprend que le personnage est en ligne et qui se tient autour. Plus de services, c'est plus de monde à voir, et plus d'opérateurs qui savent. Mieux vaut garder la liste courte.</li>
       </ul>
     </div>
@@ -485,13 +485,14 @@ journalctl -u lprdv -f</code></pre>
 sudo cat /var/lib/lprdv/admin.token</code></pre>
         </li>
         <li>
-          <h3>Join the federation (optional)</h3>
-          <p>To let your users discover other services, list them in <code>/var/lib/lprdv/peers.txt</code>, one <code>address&nbsp;&nbsp;label</code> per line. The file is re-read live. To appear in another service's directory, apply to it once at startup; its operator decides.</p>
+          <h3>The open circle and federation</h3>
+          <p>Out of the box, the service applies to the <a href="reseau.html">open circle</a> at startup and every day, under the IPv4 address it connects from. It joins after 72 hours of reliable answers. Add <code>--no-announce</code> to stay out, or give it a name and a label as below.</p>
+          <p>To let your users discover other services, list them in <code>/var/lib/lprdv/peers.txt</code>, one <code>address&nbsp;&nbsp;label</code> per line. The file is re-read live. To appear in another service's directory instead, pass it to <code>--announce-to</code>; its operator decides.</p>
 <pre><code>sudo systemctl edit lprdv</code></pre>
           <p>Then, in the editor that opens:</p>
 <pre><code>[Service]
 ExecStart=
-ExecStart=/opt/lprdv/lprdv --port 47900 --announce-to directory.example.org --public-address rdv.example.org:47900 --label "My Free Company"</code></pre>
+ExecStart=/opt/lprdv/lprdv --port 47900 --public-address rdv.example.org --label "My Free Company"</code></pre>
         </li>
         <li>
           <h3>Update</h3>
@@ -559,13 +560,14 @@ journalctl -u lprdv -f</code></pre>
 sudo cat /var/lib/lprdv/admin.token</code></pre>
         </li>
         <li>
-          <h3>Rejoindre la fédération (facultatif)</h3>
-          <p>Pour que les utilisateurs découvrent d'autres services, les lister dans <code>/var/lib/lprdv/peers.txt</code>, une ligne <code>adresse&nbsp;&nbsp;libellé</code> par service. Le fichier est relu à chaud. Pour figurer dans l'annuaire d'un autre service, il suffit de s'y porter candidat au démarrage ; son opérateur décide.</p>
+          <h3>Le cercle ouvert et la fédération</h3>
+          <p>Sans rien configurer, le service se porte candidat au <a href="reseau.html#fr">cercle ouvert</a> au démarrage puis chaque jour, sous l'adresse IPv4 d'où il se connecte. Il y entre après 72 heures de réponses fiables. <code>--no-announce</code> l'en tient à l'écart ; on peut aussi lui donner un nom et un libellé, comme ci-dessous.</p>
+          <p>Pour que les utilisateurs découvrent d'autres services, les lister dans <code>/var/lib/lprdv/peers.txt</code>, une ligne <code>adresse&nbsp;&nbsp;libellé</code> par service. Le fichier est relu à chaud. Pour figurer plutôt dans l'annuaire d'un autre service, le donner à <code>--announce-to</code> ; son opérateur décide.</p>
 <pre><code>sudo systemctl edit lprdv</code></pre>
           <p>Puis, dans l'éditeur qui s'ouvre :</p>
 <pre><code>[Service]
 ExecStart=
-ExecStart=/opt/lprdv/lprdv --port 47900 --announce-to annuaire.exemple.fr --public-address rdv.exemple.fr:47900 --label "Ma compagnie libre"</code></pre>
+ExecStart=/opt/lprdv/lprdv --port 47900 --public-address rdv.exemple.fr --label "Ma compagnie libre"</code></pre>
         </li>
         <li>
           <h3>Mettre à jour</h3>
