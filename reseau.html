@@ -85,6 +85,8 @@ th{font-weight:800;background:rgba(95,180,255,.1);white-space:nowrap}
 tr + tr td{border-top:1px solid var(--line)}
 td.addr{font-family:var(--mono);font-size:.84rem;color:#cfe6ff;overflow-wrap:anywhere}
 td.label{font-weight:700}
+td.country{white-space:nowrap;font-variant-numeric:tabular-nums}
+.flag{display:inline-block;width:1.33em;height:1em;margin-right:7px;vertical-align:-2px;border-radius:2px;box-shadow:0 0 0 1px var(--line);object-fit:cover}
 td.label:empty::before,.pcard .label:empty::before{content:"·";color:var(--faint);font-weight:400}
 td.num,th.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;background:var(--faint)}
@@ -124,7 +126,8 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
   .tbl tr + tr{border-top:1px solid var(--line)}
   .tbl td{padding:0;border:0 !important}
   .tbl td.addr{grid-column:1 / -1;grid-row:2}
-  .tbl td.when{grid-column:1 / -1;grid-row:3;color:var(--mute);font-size:.88rem}
+  .tbl td.when{grid-column:1;grid-row:3;color:var(--mute);font-size:.88rem}
+  .tbl td.country{grid-column:2;grid-row:3;text-align:right;font-size:.88rem}
   .tbl td.num{grid-column:2;grid-row:1}
   .key dd{margin-bottom:6px}
 }
@@ -169,7 +172,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
     <p class="msg" id="listed-empty" hidden></p>
     <div class="tbl" id="listed-table">
       <table>
-        <thead><tr><th data-t="label">Name</th><th data-t="address">Address</th><th data-t="since">Listed since</th><th class="num" data-t="availability">Last 24 h</th></tr></thead>
+        <thead><tr><th data-t="label">Name</th><th data-t="country">Country</th><th data-t="address">Address</th><th data-t="since">Listed since</th><th class="num" data-t="availability">Last 24 h</th></tr></thead>
         <tbody id="listed-rows"></tbody>
       </table>
     </div>
@@ -184,7 +187,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
     <h2><span data-t="delistedTitle">Recently left</span></h2>
     <div class="tbl">
       <table>
-        <thead><tr><th data-t="label">Name</th><th data-t="address">Address</th><th data-t="left">Left</th><th class="num" data-t="lastSeen">Last answer</th></tr></thead>
+        <thead><tr><th data-t="label">Name</th><th data-t="country">Country</th><th data-t="address">Address</th><th data-t="left">Left</th><th class="num" data-t="lastSeen">Last answer</th></tr></thead>
         <tbody id="delisted-rows"></tbody>
       </table>
     </div>
@@ -210,6 +213,8 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
     <a href="expert.html" data-i18n="expert">Under the hood</a>
     <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous" data-i18n="rdv">Rendezvous source</a>
     <a href="https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/issues" data-i18n="bug">Report a problem</a>
+    <!-- Mention exigée par la licence CC BY 4.0 de la base des pays, telle quelle. -->
+    <a href="https://db-ip.com">IP Geolocation by DB-IP</a>
   </footer>
 </div>
 <script>
@@ -230,7 +235,7 @@ const TEXT = {
   en: {
     listed: "Listed", onProbation: "On probation", candidates: "Candidates", delistedCount: "Recently left",
     listedTitle: "Listed services", probationTitle: "On probation", delistedTitle: "Recently left", authorityTitle: "The signed list",
-    label: "Name", address: "Address", since: "Listed since", availability: "Last 24 h", left: "Left", lastSeen: "Last answer",
+    label: "Name", country: "Country", address: "Address", since: "Listed since", availability: "Last 24 h", left: "Left", lastSeen: "Last answer",
     issued: "Signed", expires: "Expires", fingerprint: "Key fingerprint", fullKey: "Full public key (P-256)",
     unavailable: "Network status unavailable for now.",
     empty: "No service listed yet.",
@@ -245,7 +250,7 @@ const TEXT = {
   fr: {
     listed: "Listés", onProbation: "En probation", candidates: "Candidats", delistedCount: "Sortis récemment",
     listedTitle: "Services listés", probationTitle: "En probation", delistedTitle: "Sortis récemment", authorityTitle: "La liste signée",
-    label: "Nom", address: "Adresse", since: "Listé depuis", availability: "Sur 24 h", left: "Sorti le", lastSeen: "Dernière réponse",
+    label: "Nom", country: "Pays", address: "Adresse", since: "Listé depuis", availability: "Sur 24 h", left: "Sorti le", lastSeen: "Dernière réponse",
     issued: "Signée le", expires: "Expire le", fingerprint: "Empreinte de la clé", fullKey: "Clé publique complète (P-256)",
     unavailable: "État du réseau indisponible pour l'instant.",
     empty: "Aucun service listé.",
@@ -297,6 +302,29 @@ function cell(row, value, className) {
   return td;
 }
 
+// Le drapeau vient de flag-icons, en SVG : les émojis de drapeau s'affichent
+// en deux lettres sous Windows. Le code a été vérifié par reseau.py, et l'est
+// encore ici, puisqu'il devient un nom de fichier.
+const FLAGS = "https://cdn.jsdelivr.net/npm/flag-icons@7.5.0/flags/4x3/";
+function country(code) {
+  const span = document.createElement("span");
+  span.className = "country";
+  if (typeof code !== "string" || !/^[A-Z]{2}$/.test(code)) return span;
+  const img = document.createElement("img");
+  img.className = "flag";
+  img.src = `${FLAGS}${code.toLowerCase()}.svg`;
+  img.alt = "";
+  img.loading = "lazy";
+  let name = code;
+  try { name = new Intl.DisplayNames([document.documentElement.lang], { type: "region" }).of(code) || code; } catch {}
+  span.title = name;
+  span.append(img, code);
+  return span;
+}
+function countryCell(row, code) {
+  const td = cell(row, "", "country");
+  td.append(country(code));
+}
 function availability(row, value) {
   const td = cell(row, "", "num");
   const dot = document.createElement("span");
@@ -334,6 +362,7 @@ function render() {
   for (const s of listed) {
     const row = rows.insertRow();
     cell(row, s.label, "label");
+    countryCell(row, s.country);
     cell(row, s.address, "addr");
     cell(row, s.since ? date(s.since) : "", "when");
     availability(row, s.availability24h);
@@ -354,7 +383,7 @@ function render() {
     const address = document.createElement("span");
     address.className = "addr";
     address.textContent = s.address;
-    head.append(label, address);
+    head.append(label, country(s.country), address);
 
     const hours = Math.min(72, Math.max(0, s.probation?.hours ?? 0));
     const bar = document.createElement("div");
@@ -388,6 +417,7 @@ function render() {
   for (const s of delisted) {
     const row = gone.insertRow();
     cell(row, s.label, "label");
+    countryCell(row, s.country);
     cell(row, s.address, "addr");
     cell(row, s.since ? date(s.since, true) : "", "when");
     cell(row, s.lastSeen ? date(s.lastSeen, true) : "", "num");

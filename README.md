@@ -52,7 +52,10 @@ du dépôt du plugin), et chaque heure à la minute 17, pour rattraper un décle
   (`rdv.linkpearl.eorzea.events:47900`, trame `NetworkStatusQuery`). Si l'autorité ne répond
   pas ou répond de travers, il reprend l'instantané déjà publié ; sans l'un ni l'autre, il
   n'écrit rien, le reste du site part quand même et la page dit l'état indisponible. Elle
-  signale aussi un instantané de plus de trois heures.
+  signale aussi un instantané de plus de trois heures. Chaque service y reçoit le code de son
+  pays, tiré de la base DB-IP « IP to Country Lite » (CC BY 4.0, d'où la mention en pied de
+  page) : `pages.yml` la télécharge une fois par mois, en cache, et la passe par
+  `RESEAU_PAYS`. Sans elle, la colonne Pays reste vide et le site part quand même.
 - Seuls `*.html`, `install.sh`, `assets/` et `.nojekyll` sont publiés : un nouveau fichier à la
   racine doit être ajouté à la ligne `cp` de `pages.yml`.
 

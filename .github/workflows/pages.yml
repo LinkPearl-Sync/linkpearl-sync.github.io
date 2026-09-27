@@ -55,7 +55,34 @@ jobs:
           sparse-checkout: repo.json
           sparse-checkout-cone-mode: false
 
+      # Le mois de la base des pays sert de clé : DB-IP la republie le 1er,
+      # et la retélécharger à chaque publication horaire serait abusif.
+      - name: Mois de la base des pays
+        id: geo
+        run: echo "month=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
+        with:
+          path: geo
+          key: dbip-country-lite-${{ steps.geo.outputs.month }}
+
+      # En début de mois, la base du mois peut ne pas encore être en ligne :
+      # celle du mois précédent fait l'affaire. Si aucune ne vient, le site
+      # part quand même, sans pays.
+      - name: Base des pays (DB-IP Lite, CC BY 4.0)
+        run: |
+          mkdir -p geo
+          [ -s geo/country.csv.gz ] && exit 0
+          for month in ${{ steps.geo.outputs.month }} $(date -u -d "$(date -u +%Y-%m-01) -1 day" +%Y-%m); do
+            curl -fsSL --max-time 120 -o geo/country.csv.gz \
+              "https://download.db-ip.com/free/dbip-country-lite-$month.csv.gz" && exit 0
+          done
+          rm -f geo/country.csv.gz
+          echo "::warning::Base des pays introuvable, services sans pays"
+
       - name: Assembler
+        env:
+          RESEAU_PAYS: geo/country.csv.gz
         run: |
           # Un manifeste illisible ne doit pas remplacer le bon : Dalamud
           # retirerait le plugin de la liste de tous les joueurs.
@@ -64,6 +91,8 @@ jobs:
           cp -r site/*.html site/install.sh site/assets site/.nojekyll out/
           cp plugin/repo.json out/repo.json
           # L'instantané public du réseau ; en panne, le dernier publié.
+          # Les pays viennent de RESEAU_PAYS ; sans la base, la colonne reste vide.
+          [ -s "$RESEAU_PAYS" ] || unset RESEAU_PAYS
           python3 site/scripts/reseau.py out/reseau.json
 
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b  # v5

@@ -3,6 +3,11 @@
 
 Usage : reseau.py SORTIE [HÔTE [PORT]]
 
+Avec RESEAU_PAYS pointant vers la base DB-IP « IP to Country Lite » (le CSV
+compressé, dbip-country-lite-AAAA-MM.csv.gz), chaque service reçoit le code
+de son pays. Sans elle, ou pour un nom qui ne se résout pas, il n'en a pas, et
+la page laisse la case vide.
+
 Le service n'a aucune page HTTP publique : il rend l'état du réseau par la
 trame NetworkStatusQuery, sur son port habituel. Le site étant statique, ce
 script l'interroge à chaque déploiement horaire et écrit le JSON à côté de la
@@ -13,7 +18,12 @@ dernier état, avec son heure qui vieillit, vaut mieux qu'une page vide pendant
 une panne du VPS. Sans l'un ni l'autre, il n'écrit rien et la page le dit.
 """
 
+import bisect
+import gzip
+import ipaddress
 import json
+import os
+import re
 import socket
 import struct
 import sys
@@ -35,6 +45,11 @@ TIMEOUT = 15
 
 STANDINGS = {"listed", "probation", "delisted"}
 MAX_TEXT = 256
+
+# Deux lettres majuscules, rien d'autre : la page en fait le nom d'un fichier
+# de drapeau. « ZZ » est le « pays inconnu » de DB-IP, qu'on ne publie pas.
+COUNTRY = re.compile(r"[A-Z]{2}")
+UNKNOWN_COUNTRY = "ZZ"
 
 
 class Refused(Exception):
@@ -88,6 +103,62 @@ def fetch(host, port):
     return json.loads(b"".join(chunks).decode("utf-8"))
 
 
+class Countries:
+    """Les plages de la base DB-IP, par version d'IP, triées par début."""
+
+    def __init__(self, path):
+        ranges = {4: [], 6: []}
+        with gzip.open(path, "rt", encoding="ascii") as rows:
+            for row in rows:
+                start, end, country = row.rstrip("\n").split(",")
+                first = ipaddress.ip_address(start)
+                ranges[first.version].append((int(first), int(ipaddress.ip_address(end)), country))
+        for version in ranges:
+            ranges[version].sort()
+        self.starts = {version: [r[0] for r in rows] for version, rows in ranges.items()}
+        self.ranges = ranges
+
+    def of(self, address):
+        ip = ipaddress.ip_address(address)
+        index = bisect.bisect_right(self.starts[ip.version], int(ip)) - 1
+        if index < 0:
+            return None
+        _, end, country = self.ranges[ip.version][index]
+        if int(ip) > end or not COUNTRY.fullmatch(country) or country == UNKNOWN_COUNTRY:
+            return None
+        return country
+
+
+def host_of(address):
+    """« nom:port », « [v6]:port » ou « nom » seul : le nom, sans le port."""
+    if address.startswith("["):
+        return address[1:address.index("]")]
+    if address.count(":") == 1:
+        return address.split(":")[0]
+    return address
+
+
+def locate(status, countries):
+    """Ajoute à chaque service le pays de son adresse, quand on la trouve.
+
+    IPv4 d'abord : c'est l'adresse que la plupart des joueurs joindront. Un
+    service déjà situé (instantané repris) garde son pays si le nom ne se
+    résout plus ce coup-ci.
+    """
+    for service in status["services"]:
+        try:
+            host = host_of(service["address"])
+            found = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
+        except (OSError, ValueError, UnicodeError):
+            continue
+        addresses = sorted({info[4][0] for info in found}, key=lambda a: ":" in a)
+        for address in addresses:
+            country = countries.of(address.split("%")[0])
+            if country:
+                service["country"] = country
+                break
+
+
 def text(value):
     return isinstance(value, str) and len(value) <= MAX_TEXT
 
@@ -120,6 +191,10 @@ def validate(status):
             raise Refused("adresse ou libellé malformé")
         if service.get("standing") not in STANDINGS:
             raise Refused(f"état inconnu {service.get('standing')!r}")
+        if "country" in service and not (
+            isinstance(service["country"], str) and COUNTRY.fullmatch(service["country"])
+        ):
+            raise Refused(f"pays malformé {service['country']!r}")
 
     authority = status.get("authority")
     if authority is not None and (
@@ -160,10 +235,19 @@ def main():
             print(f"::warning::Aucun instantané publié non plus ({fallback}), reseau.json absent", file=sys.stderr)
             return 0
 
+    geo = os.environ.get("RESEAU_PAYS")
+    if geo:
+        try:
+            locate(status, Countries(geo))
+        except (OSError, ValueError, EOFError) as error:
+            # Un drapeau manquant ne vaut pas un site non publié.
+            print(f"::warning::Base des pays illisible ({error}), services sans pays", file=sys.stderr)
+
     with open(output, "w", encoding="utf-8") as file:
         json.dump(status, file, ensure_ascii=False, separators=(",", ":"))
 
-    print(f"reseau.json : {len(status['services'])} services, depuis {source}")
+    located = sum(1 for service in status["services"] if "country" in service)
+    print(f"reseau.json : {len(status['services'])} services dont {located} situés, depuis {source}")
     return 0
 
 
