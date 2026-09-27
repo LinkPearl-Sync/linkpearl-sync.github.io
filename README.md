@@ -8,7 +8,7 @@ Des pages statiques, sans outil de construction :
 - `index.html`, l'accueil ;
 - `expert.html`, le fonctionnement (connexion, chiffrement, transferts, ce que voit un service,
   fédération) et le guide d'auto-hébergement pas à pas ;
-- `reseau.html`, l'état du cercle ouvert ;
+- `reseau.html`, l'état du réseau ouvert ;
 - `heberger.html`, le générateur de la commande d'installation d'un service ;
 - `install.sh`, le script que cette commande lance ;
 - leurs images dans `assets/`.
@@ -47,7 +47,7 @@ du dépôt du plugin), et chaque heure à la minute 17, pour rattraper un décle
   n'est pas dans ce dépôt : le workflow le reprend du dépôt du plugin. Il vérifie d'abord que
   c'est un tableau non vide dont chaque entrée a `InternalName`, `AssemblyVersion` et
   `DownloadLinkInstall` ; sinon le déploiement échoue et l'ancien reste en ligne.
-- **`reseau.json`**, l'état public du cercle ouvert que `reseau.html` affiche, n'y est pas non
+- **`reseau.json`**, l'état public du réseau ouvert que `reseau.html` affiche, n'y est pas non
   plus : `scripts/reseau.py`, en Python standard, le demande à l'autorité
   (`rdv.linkpearl.eorzea.events:47900`, trame `NetworkStatusQuery`). Si l'autorité ne répond
   pas ou répond de travers, il reprend l'instantané déjà publié ; sans l'un ni l'autre, il

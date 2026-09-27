@@ -7,7 +7,7 @@
 #   --public-address NOM   nom ou IPv4 sous lequel les autres le joignent ;
 #                          sans lui, l'autorité retient l'IPv4 de la candidature
 #   --label TEXTE          nom affiché dans les annuaires (64 octets au plus)
-#   --no-announce          ne pas se porter candidat au cercle ouvert
+#   --no-announce          ne pas se porter candidat au réseau ouvert
 #   --no-firewall          ne pas toucher au pare-feu
 #   --no-auto-update       ne pas se mettre à jour seul (lprdv-update.timer)
 #   --auto-update          la rallumer après un --no-auto-update

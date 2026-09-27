@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Linkpearl Sync, the open circle</title>
-<meta name="description" content="The rendezvous services of Linkpearl Sync's open circle: who runs them, since when, and how available they are.">
+<title>Linkpearl Sync, the open network</title>
+<meta name="description" content="The rendezvous services of Linkpearl Sync's open network: who runs them, since when, and how available they are.">
 <meta name="theme-color" content="#07123a">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Linkpearl Sync, the open circle">
-<meta property="og:description" content="The public state of the open circle: listed services and services on probation.">
+<meta property="og:title" content="Linkpearl Sync, the open network">
+<meta property="og:description" content="The public state of the open network: listed services and services on probation.">
 <meta property="og:url" content="https://linkpearl-sync.github.io/reseau.html">
 <meta property="og:image" content="https://linkpearl-sync.github.io/assets/banner.png">
 <link rel="icon" type="image/png" href="assets/logo.png">
@@ -145,10 +145,10 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
 
   <header class="hero">
     <div data-v="en">
-      <h1>The open <em>circle</em></h1>
+      <h1>The open <em>network</em></h1>
     </div>
     <div data-v="fr">
-      <h1>Le cercle <em>ouvert</em></h1>
+      <h1>Le réseau <em>ouvert</em></h1>
     </div>
   </header>
 
@@ -418,7 +418,7 @@ function apply(l) {
   only.textContent = c.only;
   only.hidden = !c.only;
   if (c.only) only.lang = l; else only.removeAttribute("lang");
-  document.title = shown === "fr" ? "Linkpearl Sync, le cercle ouvert" : "Linkpearl Sync, the open circle";
+  document.title = shown === "fr" ? "Linkpearl Sync, le réseau ouvert" : "Linkpearl Sync, the open network";
   document.querySelectorAll(".langs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
   render();
 }

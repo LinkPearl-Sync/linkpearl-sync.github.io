@@ -133,7 +133,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       <input type="number" id="port" min="1" max="65535" value="47900">
       <p class="error" id="port-error" hidden></p>
     </div>
-    <label class="check"><input type="checkbox" id="announce" checked><span><b data-t="announce">Join the open circle</b><span class="small" data-t="announceHint"></span></span></label>
+    <label class="check"><input type="checkbox" id="announce" checked><span><b data-t="announce">Join the open network</b><span class="small" data-t="announceHint"></span></span></label>
     <label class="check"><input type="checkbox" id="firewall" checked><span><b data-t="firewall">Open the port in ufw or firewalld</b><span class="small" data-t="firewallHint"></span></span></label>
     <label class="check"><input type="checkbox" id="autoupdate" checked><span><b data-t="autoUpdate">Update automatically</b><span class="small" data-t="autoUpdateHint"></span></span></label>
   </form>
@@ -141,7 +141,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
   <section class="out">
     <pre id="command" aria-live="polite"><code></code><button type="button" class="copy" id="copy"></button></pre>
     <p class="small" data-t="after"></p>
-    <p class="links"><a href="install.sh" data-t="readScript">Read the script</a><a href="expert.html#self-host" data-t="manual">Step by step instead</a><a href="reseau.html" data-t="network">The open circle</a></p>
+    <p class="links"><a href="install.sh" data-t="readScript">Read the script</a><a href="expert.html#self-host" data-t="manual">Step by step instead</a><a href="reseau.html" data-t="network">The open network</a></p>
   </section>
 
   <footer>
@@ -166,27 +166,27 @@ const CHROME = {
 
 const TEXT = {
   en: {
-    address: "Public address", addressHint: "A name or an IPv4 address. Empty: the open circle takes the IPv4 address the server connects from.",
-    label: "Label", labelHint: "Shown in the open circle. Optional.",
+    address: "Public address", addressHint: "A name or an IPv4 address. Empty: the open network takes the IPv4 address the server connects from.",
+    label: "Label", labelHint: "Shown in the open network. Optional.",
     port: "Port",
-    announce: "Join the open circle", announceHint: "The server applies at startup, then every day.",
+    announce: "Join the open network", announceHint: "The server applies at startup, then every day.",
     firewall: "Open the port in ufw or firewalld", firewallHint: "Your host's firewall panel, if it has one, is up to you.",
     autoUpdate: "Update automatically", autoUpdateHint: "Signed releases only, 24 hours after publication. Back to the previous version if the new one doesn't answer.",
     after: "Running the same command again updates the service; run the full command again to change an option. /var/lib/lprdv is never touched.",
-    readScript: "Read the script", manual: "Step by step instead", network: "The open circle",
+    readScript: "Read the script", manual: "Step by step instead", network: "The open network",
     badAddress: "A name or an IPv4 address, optionally followed by :port.",
     badLabel: "At most 64 bytes (an accented letter counts as two), no quote, backslash, $, % or backtick.",
     badPort: "Between 1 and 65535, except 47901 (the console).",
   },
   fr: {
-    address: "Adresse publique", addressHint: "Un nom ou une adresse IPv4. Vide : le cercle ouvert retient l'adresse IPv4 d'où le serveur se connecte.",
-    label: "Libellé", labelHint: "Affiché dans le cercle ouvert. Facultatif.",
+    address: "Adresse publique", addressHint: "Un nom ou une adresse IPv4. Vide : le réseau ouvert retient l'adresse IPv4 d'où le serveur se connecte.",
+    label: "Libellé", labelHint: "Affiché dans le réseau ouvert. Facultatif.",
     port: "Port",
-    announce: "Rejoindre le cercle ouvert", announceHint: "Le serveur se porte candidat au démarrage, puis chaque jour.",
+    announce: "Rejoindre le réseau ouvert", announceHint: "Le serveur se porte candidat au démarrage, puis chaque jour.",
     firewall: "Ouvrir le port dans ufw ou firewalld", firewallHint: "Le pare-feu de l'hébergeur, s'il en a un, reste à régler soi-même.",
     autoUpdate: "Mettre à jour automatiquement", autoUpdateHint: "Versions signées seulement, 24 heures après leur publication. Retour à la précédente si la nouvelle ne répond pas.",
     after: "Relancer la même commande met le service à jour ; relancer la commande complète pour changer une option. /var/lib/lprdv n'est jamais touché.",
-    readScript: "Lire le script", manual: "Pas à pas plutôt", network: "Le cercle ouvert",
+    readScript: "Lire le script", manual: "Pas à pas plutôt", network: "Le réseau ouvert",
     badAddress: "Un nom ou une adresse IPv4, éventuellement suivi de :port.",
     badLabel: "64 octets au plus (une lettre accentuée en compte deux), sans guillemet, barre oblique inverse, $, % ni accent grave.",
     badPort: "Entre 1 et 65535, sauf 47901 (la console).",
