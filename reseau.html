@@ -83,7 +83,14 @@ table{border-collapse:collapse;width:100%;font-size:.93rem}
 th,td{text-align:left;padding:9px 14px;vertical-align:middle}
 th{font-weight:800;background:rgba(95,180,255,.1);white-space:nowrap}
 tr + tr td{border-top:1px solid var(--line)}
-td.addr{font-family:var(--mono);font-size:.84rem;color:#cfe6ff;overflow-wrap:anywhere}
+/* Une adresse ne se coupe qu'après un point ou avant le port (les <wbr> posés par
+   addressNode) : « anywhere » laissait le tableau réduire la colonne jusqu'à
+   couper « 47900 » en deux. break-word ne sert qu'en dernier recours. */
+td.addr{font-family:var(--mono);font-size:.84rem;color:#cfe6ff;overflow-wrap:break-word}
+td.when{white-space:nowrap}
+/* Sur un écran large, c'est le nom qui passe à la ligne, jamais l'adresse. Chrome
+   coupe encore aux <wbr> sous nowrap : on les retire du rendu. */
+@media (min-width:860px){td.addr{white-space:nowrap}td.addr wbr{display:none}}
 td.label{font-weight:700}
 td.country{white-space:nowrap;font-variant-numeric:tabular-nums}
 .flag{display:inline-block;width:1.33em;height:1em;margin-right:7px;vertical-align:-2px;border-radius:2px;box-shadow:0 0 0 1px var(--line);object-fit:cover}
@@ -98,7 +105,7 @@ td.num,th.num{font-variant-numeric:tabular-nums;text-align:right;white-space:now
 .pcard{display:grid;gap:8px;padding:14px 18px;border-radius:18px;border:1px solid var(--line);background:var(--card)}
 .pcard .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
 .pcard .label{font-weight:800}
-.pcard .addr{font-family:var(--mono);font-size:.84rem;color:#cfe6ff;overflow-wrap:anywhere}
+.pcard .addr{font-family:var(--mono);font-size:.84rem;color:#cfe6ff;overflow-wrap:break-word}
 .bar{position:relative;height:10px;border-radius:999px;background:rgba(4,11,38,.8);border:1px solid var(--line);overflow:hidden}
 .bar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,#7a9cff,var(--glow))}
 .pcard .facts{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px;color:var(--mute);font-size:.9rem}
@@ -295,6 +302,22 @@ function percent(ratio) {
   return new Intl.NumberFormat(document.documentElement.lang, { style: "percent", maximumFractionDigits: 0 }).format(ratio);
 }
 
+// L'adresse en morceaux coupables : après chaque point, et avant le port.
+function addressNode(address) {
+  const span = document.createElement("span");
+  for (const part of String(address ?? "").split(/(?<=\.)|(?=:)/)) {
+    if (span.childNodes.length) span.append(document.createElement("wbr"));
+    span.append(part);
+  }
+  return span;
+}
+
+function addressCell(row, address) {
+  const td = cell(row, "", "addr");
+  td.append(addressNode(address));
+  return td;
+}
+
 function cell(row, value, className) {
   const td = row.insertCell();
   td.textContent = value;
@@ -363,7 +386,7 @@ function render() {
     const row = rows.insertRow();
     cell(row, s.label, "label");
     countryCell(row, s.country);
-    cell(row, s.address, "addr");
+    addressCell(row, s.address);
     cell(row, s.since ? date(s.since) : "", "when");
     availability(row, s.availability24h);
   }
@@ -382,7 +405,7 @@ function render() {
     label.textContent = s.label;
     const address = document.createElement("span");
     address.className = "addr";
-    address.textContent = s.address;
+    address.append(addressNode(s.address));
     head.append(label, country(s.country), address);
 
     const hours = Math.min(72, Math.max(0, s.probation?.hours ?? 0));
@@ -418,7 +441,7 @@ function render() {
     const row = gone.insertRow();
     cell(row, s.label, "label");
     countryCell(row, s.country);
-    cell(row, s.address, "addr");
+    addressCell(row, s.address);
     cell(row, s.since ? date(s.since, true) : "", "when");
     cell(row, s.lastSeen ? date(s.lastSeen, true) : "", "num");
   }
