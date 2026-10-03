@@ -45,8 +45,11 @@ du dépôt du plugin), et chaque heure à la minute 17, pour rattraper un décle
 
 - **`repo.json`**, le dépôt Dalamud servi sur <https://linkpearl-sync.github.io/repo.json>,
   n'est pas dans ce dépôt : le workflow le reprend du dépôt du plugin. Il vérifie d'abord que
-  c'est un tableau non vide dont chaque entrée a `InternalName`, `AssemblyVersion` et
-  `DownloadLinkInstall` ; sinon le déploiement échoue et l'ancien reste en ligne.
+  c'est un tableau non vide dont chaque entrée a un `InternalName`, un `AssemblyVersion` (et un
+  `TestingAssemblyVersion` s'il est présent) à quatre nombres, et des `DownloadLink*` qui sont
+  exactement `https://github.com/LinkPearl-Sync/linkpearl-sync-plugin/releases/download/vX.Y.Z[-test]/LinkpearlSync.zip`.
+  Ce fichier désigne le code chargé dans le jeu de chaque joueur : sinon le déploiement échoue
+  et l'ancien reste en ligne. Le workflow du plugin applique les mêmes règles avant d'écrire.
 - **`reseau.json`**, l'état public du réseau ouvert que `reseau.html` affiche, n'y est pas non
   plus : `scripts/reseau.py`, en Python standard, le demande à l'autorité
   (`rdv.linkpearl.eorzea.events:47900`, trame `NetworkStatusQuery`). Si l'autorité ne répond
@@ -67,11 +70,18 @@ du dépôt du plugin), et chaque heure à la minute 17, pour rattraper un décle
 curl -fsSL https://linkpearl-sync.github.io/install.sh | sudo bash -s -- [options]
 ```
 
-Il prend la dernière release du rendez-vous et la vérifie par `lprdv.sha256`, qui couvre le
-binaire et les trois unités systemd ; rien n'est posé si une somme ne correspond pas. Il crée le
-compte `lprdv`, pose l'unité générique et écrit les options du service dans un complément,
-`/etc/systemd/system/lprdv.service.d/options.conf`. Il ne touche jamais à `/var/lib/lprdv`. Il
-exige Linux x86-64, systemd, curl et sha256sum.
+Il prend la dernière release du rendez-vous et vérifie la signature de son manifeste,
+`lprdv.release.json` et `lprdv.release.json.sig` (ECDSA P-256, signature IEEE P1363 convertie
+en DER pour openssl), avec les clés publiques de `Linkpearl.Rendezvous/ReleaseKeys.cs`, recopiées
+dans `RELEASE_KEYS` : une clé ajoutée là-bas s'ajoute ici avant la première release qu'elle
+signe. Le binaire et `lprdv.service` doivent avoir les sommes du manifeste signé ; `lprdv.sha256`,
+qui vient de la même release sans signature, n'est plus lu. Le manifeste ne couvre pas encore
+`lprdv-update.service` ni `lprdv-update.timer` : tant qu'il ne les couvre pas, le script pose
+sa propre copie de ces deux unités (`builtin_unit`), à recopier de `deploy/` du service quand
+elles changent ; `install.yml` signale une dérive. Rien n'est posé si une vérification échoue.
+Il crée le compte `lprdv`, pose l'unité générique et écrit les options du service dans un
+complément, `/etc/systemd/system/lprdv.service.d/options.conf`. Il ne touche jamais à
+`/var/lib/lprdv`. Il exige Linux x86-64, systemd, curl, sha256sum, openssl et od.
 
 - `--port N` (47900 par défaut ; 47901, celui de la console, est refusé), `--public-address
   NOM[:port]`, `--label TEXTE` (64 octets UTF-8, sans `"` `\` `$` `%` ni accent grave),
@@ -85,16 +95,22 @@ exige Linux x86-64, systemd, curl et sha256sum.
   installation d'avant le minuteur le reçoit actif. Avec une option de configuration mais sans
   aucune des deux, il la rallume : c'est pourquoi `heberger.html` écrit toujours l'une ou
   l'autre.
-- `LPRDV_RELEASES` remplace l'adresse des releases, pour un essai.
+- `LPRDV_RELEASES` remplace l'adresse des releases, pour un essai. La signature reste exigée.
 
 Les règles de validation sont les mêmes dans `install.sh` et `heberger.html` (le bloc
 commenté de chacun) : en changer une, c'est changer l'autre.
 
-`.github/workflows/install.yml` passe `shellcheck`, puis exécute le script pour de vrai, avec
+`tests/verification.sh` exerce la vérification hors ligne, avec une clé jetable et un manifeste
+signé au format de la CI du service : signatures valides, manifeste altéré, clé inconnue,
+signature DER ou tronquée, somme absente ou en double. Il extrait les fonctions d'`install.sh`
+entre les marqueurs `vérification (début)` et `(fin)`, à garder.
+
+`.github/workflows/install.yml` passe `shellcheck` et `tests/verification.sh`, compare les
+unités intégrées à celles de la dernière release, puis exécute le script pour de vrai, avec
 systemd et sudo, sur un runner jetable : refus des options invalides, première installation,
 unité de mise à jour lancée sous systemd, relance sans option, mise à niveau d'une installation
 sans minuteur, minuteur coupé puis rallumé. Il tourne à chaque push ou pull request qui touche
-`install.sh` ou le workflow, à la demande, et chaque lundi, parce que la dernière release du
+`install.sh`, `tests/` ou le workflow, à la demande, et chaque lundi, parce que la dernière release du
 rendez-vous peut changer sans que ce dépôt bouge. Une modification de `heberger.html` seule ne
 le lance pas.
 

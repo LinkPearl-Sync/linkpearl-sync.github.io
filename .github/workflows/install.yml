@@ -6,9 +6,9 @@ name: Essayer install.sh
 # qui peut changer sans que ce dépôt bouge.
 on:
   push:
-    paths: [install.sh, .github/workflows/install.yml]
+    paths: [install.sh, tests/**, .github/workflows/install.yml]
   pull_request:
-    paths: [install.sh, .github/workflows/install.yml]
+    paths: [install.sh, tests/**, .github/workflows/install.yml]
   workflow_dispatch:
   schedule:
     - cron: '41 6 * * 1'
@@ -24,7 +24,23 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
 
       - name: shellcheck
-        run: shellcheck install.sh
+        run: shellcheck install.sh tests/verification.sh
+
+      - name: Vérification de signature, hors ligne
+        # Clé jetable, manifeste et signature au format de la CI du service :
+        # les cas refusés ne se rencontrent pas sur une vraie release.
+        run: bash tests/verification.sh
+
+      - name: Les unités intégrées suivent celles du service
+        # install.sh pose sa propre copie de l'unité de mise à jour tant que
+        # le manifeste signé ne la couvre pas : une dérive se voit ici, pas
+        # chez un opérateur.
+        run: |
+          sed -n '/^builtin_unit() {/,/^}/p' install.sh > builtin.sh
+          for file in lprdv-update.service lprdv-update.timer; do
+            curl -fsSL -o "release-$file" "https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/$file"
+            diff -u "release-$file" <(bash -c '. ./builtin.sh; builtin_unit "$1"' _ "$file")
+          done
 
       - name: Refuse ce qu'il doit refuser
         run: |
