@@ -85,8 +85,31 @@ jobs:
           RESEAU_PAYS: geo/country.csv.gz
         run: |
           # Un manifeste illisible ne doit pas remplacer le bon : Dalamud
-          # retirerait le plugin de la liste de tous les joueurs.
-          jq -e 'type == "array" and length > 0 and all(.[]; .InternalName and .AssemblyVersion and .DownloadLinkInstall)' plugin/repo.json > /dev/null
+          # retirerait le plugin de la liste de tous les joueurs. Et ce fichier
+          # désigne le code que Dalamud charge dans le jeu de chaque joueur :
+          # qui pourrait y glisser une autre adresse distribuerait le sien. On
+          # n'accepte donc que nos releases et des versions à quatre nombres,
+          # les règles que le workflow du plugin applique avant d'écrire. Un
+          # échec arrête tout avant le déploiement : Pages continue de servir
+          # le repo.json précédent. L'adresse est décrite en entier et non par
+          # son préfixe : « v1/../../autre-depot/x.zip » commence bien comme
+          # il faut, puis se normalise ailleurs.
+          jq -e '
+            def release_url:
+              type == "string"
+              and test("^https://github\\.com/LinkPearl-Sync/linkpearl-sync-plugin/releases/download/v[0-9]+\\.[0-9]+\\.[0-9]+(-test)?/LinkpearlSync\\.zip$");
+            def assembly_version:
+              type == "string" and test("^[0-9]+(\\.[0-9]+){3}$");
+            type == "array" and length > 0 and all(.[];
+              (.InternalName | type == "string" and length > 0)
+              and (.AssemblyVersion | assembly_version)
+              and (.TestingAssemblyVersion | . == null or assembly_version)
+              and (.DownloadLinkInstall | release_url)
+              and ([to_entries[] | select(.key | startswith("DownloadLink")) | .value | release_url] | all))
+          ' plugin/repo.json > /dev/null || {
+            echo "::error::repo.json du plugin refusé : adresse hors des releases du plugin ou version malformée"
+            exit 1
+          }
           mkdir out
           cp -r site/*.html site/install.sh site/assets site/.nojekyll out/
           cp plugin/repo.json out/repo.json
