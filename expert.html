@@ -445,13 +445,14 @@ footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;color:var
       <p><strong>You need</strong> a Linux x86-64 server with a public IP address and systemd (a small VPS is enough; the provided unit caps the service at 512 MB of RAM), SSH access with sudo, and one port open in both <strong>TCP and UDP</strong>, 47900 by default.</p>
       <p><strong>Bandwidth</strong>: introducing peers costs almost nothing. Relaying is what costs: two players who can't connect directly send their whole appearance, often hundreds of megabytes, through your server.</p>
       <p class="note"><strong>In one command.</strong> <a href="heberger.html">The generator</a> writes it for you: download, check, install, open the port and start. The steps below do the same by hand.</p>
+      <p class="note"><strong>Checking by hand proves less.</strong> The checksum below comes from the same release as the binary: it proves the download is intact, not that the project published it. The generator's script also checks the release signature against the project key it carries, which a replaced release file cannot fake.</p>
       <ol class="steps">
         <li>
           <h3>Install the service</h3>
 <pre><code><span class="c"># system account that runs the service</span>
 sudo useradd --system --home-dir /var/lib/lprdv --shell /usr/sbin/nologin lprdv
 
-<span class="c"># latest release and its unit, checked against the published checksum</span>
+<span class="c"># latest release and its unit; this checksum only catches a damaged download</span>
 cd /tmp
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.service
@@ -521,13 +522,14 @@ sudo systemctl restart lprdv</code></pre>
       <p><strong>Il faut</strong> un serveur Linux x86-64 avec une adresse IP publique et systemd (un petit VPS suffit ; l'unité fournie plafonne le service à 512 Mo de mémoire), un accès SSH avec sudo, et un port ouvert en <strong>TCP et en UDP</strong>, 47900 par défaut.</p>
       <p><strong>La bande passante</strong> : mettre les pairs en relation ne coûte presque rien. C'est le relais qui coûte : deux joueurs qui ne peuvent pas se connecter directement font passer toute leur apparence, souvent des centaines de mégaoctets, par le serveur.</p>
       <p class="note"><strong>En une commande.</strong> <a href="heberger.html#fr">Le générateur</a> l'écrit pour vous : téléchargement, vérification, installation, ouverture du port et démarrage. Les étapes ci-dessous font la même chose à la main.</p>
+      <p class="note"><strong>À la main, la vérification prouve moins.</strong> L'empreinte ci-dessous vient de la même version que le binaire : elle prouve que le téléchargement est intact, pas que le projet l'a publié. Le script du générateur vérifie en plus la signature de la version avec la clé du projet qu'il embarque, ce qu'un fichier de version remplacé ne peut pas imiter.</p>
       <ol class="steps">
         <li>
           <h3>Installer le service</h3>
 <pre><code><span class="c"># compte système qui fait tourner le service</span>
 sudo useradd --system --home-dir /var/lib/lprdv --shell /usr/sbin/nologin lprdv
 
-<span class="c"># dernière version et son unité, vérifiées contre l'empreinte publiée</span>
+<span class="c"># dernière version et son unité ; cette empreinte n'attrape qu'un téléchargement abîmé</span>
 cd /tmp
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv
 curl -fLO https://github.com/LinkPearl-Sync/linkpearl-sync-rendezvous/releases/latest/download/lprdv.service
