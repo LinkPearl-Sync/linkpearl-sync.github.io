@@ -52,8 +52,11 @@ du dépôt du plugin), et chaque heure à la minute 17, pour rattraper un décle
   et l'ancien reste en ligne. Le workflow du plugin applique les mêmes règles avant d'écrire.
 - **`reseau.json`**, l'état public du réseau ouvert que `reseau.html` affiche, n'y est pas non
   plus : `scripts/reseau.py`, en Python standard, le demande à l'autorité
-  (`rdv.linkpearl.eorzea.events:47900`, trame `NetworkStatusQuery`). Si l'autorité ne répond
-  pas ou répond de travers, il reprend l'instantané déjà publié ; sans l'un ni l'autre, il
+  (`rdv.linkpearl.eorzea.events:47900`, trame `NetworkStatusQuery`). L'état voyage en TCP nu :
+  il n'est accepté que signé par la clé de l'autorité (dernier champ `"signature"`, ECDSA P-256
+  sur les octets du document sans elle), vérifiée par openssl contre `AUTHORITY_KEYS`, recopiée
+  de `Linkpearl/Core/Sync/ConsensusKeys.cs` dans le dépôt du plugin. Si l'autorité ne répond
+  pas, répond de travers ou sans signature valide, il reprend l'instantané déjà publié ; sans l'un ni l'autre, il
   n'écrit rien, le reste du site part quand même et la page dit l'état indisponible. Elle
   signale aussi un instantané de plus de trois heures. Chaque service y reçoit le code de son
   pays, tiré de la base DB-IP « IP to Country Lite » (CC BY 4.0, d'où la mention en pied de
@@ -75,10 +78,11 @@ Il prend la dernière release du rendez-vous et vérifie la signature de son man
 en DER pour openssl), avec les clés publiques de `Linkpearl.Rendezvous/ReleaseKeys.cs`, recopiées
 dans `RELEASE_KEYS` : une clé ajoutée là-bas s'ajoute ici avant la première release qu'elle
 signe. Le binaire et `lprdv.service` doivent avoir les sommes du manifeste signé ; `lprdv.sha256`,
-qui vient de la même release sans signature, n'est plus lu. Le manifeste ne couvre pas encore
-`lprdv-update.service` ni `lprdv-update.timer` : tant qu'il ne les couvre pas, le script pose
-sa propre copie de ces deux unités (`builtin_unit`), à recopier de `deploy/` du service quand
-elles changent ; `install.yml` signale une dérive. Rien n'est posé si une vérification échoue.
+qui vient de la même release sans signature, n'est plus lu. Le manifeste signé couvre aussi
+`lprdv-update.service` et `lprdv-update.timer`, qui tournent en root ; pour un manifeste plus
+ancien, qui ne les couvre pas, le script pose sa propre copie de ces deux unités
+(`builtin_unit`), à recopier de `deploy/` du service quand elles changent ; `install.yml` signale
+une dérive. Rien n'est posé si une vérification échoue.
 Il crée le compte `lprdv`, pose l'unité générique et écrit les options du service dans un
 complément, `/etc/systemd/system/lprdv.service.d/options.conf`. Il ne touche jamais à
 `/var/lib/lprdv`. Il exige Linux x86-64, systemd, curl, sha256sum, openssl et od.
@@ -95,6 +99,14 @@ complément, `/etc/systemd/system/lprdv.service.d/options.conf`. Il ne touche ja
   installation d'avant le minuteur le reçoit actif. Avec une option de configuration mais sans
   aucune des deux, il la rallume : c'est pourquoi `heberger.html` écrit toujours l'une ou
   l'autre.
+- Sur un serveur qui tourne déjà (version lue à sa console locale, jeton passé par un fichier),
+  la release n'est posée que si elle avance et qu'elle est sortie de son délai de garde : 24 h
+  après sa signature, une heure si elle est urgente, comme la mise à jour automatique.
+  `--allow-downgrade` pose une version plus ancienne que celle qui tourne, `--now` n'attend pas
+  le délai. Une release « latest » repointée vers une version plus ancienne ne fait donc pas
+  redescendre un serveur.
+- Tout le travail est dans la fonction `main`, appelée à la dernière ligne : lancé par
+  `curl | bash`, un téléchargement coupé en route n'exécute rien.
 - `LPRDV_RELEASES` remplace l'adresse des releases, pour un essai. La signature reste exigée.
 
 Les règles de validation sont les mêmes dans `install.sh` et `heberger.html` (le bloc
@@ -102,15 +114,21 @@ commenté de chacun) : en changer une, c'est changer l'autre.
 
 `tests/verification.sh` exerce la vérification hors ligne, avec une clé jetable et un manifeste
 signé au format de la CI du service : signatures valides, manifeste altéré, clé inconnue,
-signature DER ou tronquée, somme absente ou en double. Il extrait les fonctions d'`install.sh`
-entre les marqueurs `vérification (début)` et `(fin)`, à garder.
+signature DER ou tronquée, somme absente ou en double, lecture de la version, de l'heure de
+signature et de l'urgence, ordre des versions. Il extrait les fonctions d'`install.sh` entre les
+marqueurs `vérification (début)` et `(fin)`, à garder.
 
-`.github/workflows/install.yml` passe `shellcheck` et `tests/verification.sh`, compare les
+`tests/reseau_test.py` vérifie que `reseau.py` n'accepte qu'un état signé : le vecteur de
+`tests/fixtures/reseau-signe.json` a été signé par `NetworkStatus.Sign` du service avec une clé
+jetable, de sorte qu'une dérive de format entre les deux dépôts le fait refuser.
+
+`.github/workflows/install.yml` passe `shellcheck`, `tests/verification.sh` et
+`tests/reseau_test.py`, compare les
 unités intégrées à celles de la dernière release, puis exécute le script pour de vrai, avec
 systemd et sudo, sur un runner jetable : refus des options invalides, première installation,
 unité de mise à jour lancée sous systemd, relance sans option, mise à niveau d'une installation
 sans minuteur, minuteur coupé puis rallumé. Il tourne à chaque push ou pull request qui touche
-`install.sh`, `tests/` ou le workflow, à la demande, et chaque lundi, parce que la dernière release du
+`install.sh`, `scripts/`, `tests/` ou le workflow, à la demande, et chaque lundi, parce que la dernière release du
 rendez-vous peut changer sans que ce dépôt bouge. Une modification de `heberger.html` seule ne
 le lance pas.
 
