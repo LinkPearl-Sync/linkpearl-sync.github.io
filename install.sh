@@ -11,6 +11,10 @@
 #   --no-firewall          ne pas toucher au pare-feu
 #   --no-auto-update       ne pas se mettre à jour seul (lprdv-update.timer)
 #   --auto-update          la rallumer après un --no-auto-update
+#   --allow-downgrade      poser la version publiée même plus ancienne que
+#                          celle qui tourne
+#   --now                  poser une version publiée il y a moins de 24 h
+#                          (une heure si urgente), sans attendre son délai
 #
 # Rejouable : relancé sans option de configuration, il met à jour le binaire
 # et l'unité et garde les options déjà posées. Il ne touche jamais à
@@ -101,11 +105,27 @@ manifest_sum() {
   printf '%s\n' "$found" | cut -d'"' -f4
 }
 
+# Une valeur du manifeste signé : chaîne ("version":"1.2.3"), entier
+# ("signed":1790000000) ou booléen ("urgent":false). Une occurrence
+# exactement, comme pour les sommes.
+manifest_field() {
+  local found
+  found=$(grep -o "\"$2\":\(\"[0-9A-Za-z.+-]*\"\|[0-9][0-9]*\|true\|false\)" "$1" || true)
+  [ -n "$found" ] && [ "$(printf '%s\n' "$found" | wc -l)" -eq 1 ] || return 1
+  printf '%s\n' "${found#*:}" | tr -d '"'
+}
+
+# Vrai si la version $1 est strictement plus récente que $2 : 1.10.0 passe
+# après 1.9.3, ce que l'ordre alphabétique ne dirait pas.
+version_newer() {
+  [ "$1" != "$2" ] && [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -n 1)" = "$1" ]
+}
+
 # --- vérification (fin) ---
 
 # Copie de deploy/lprdv-update.service et deploy/lprdv-update.timer du
-# service, à reprendre ici quand elles changent là-bas, tant que le manifeste
-# signé ne les couvre pas.
+# service, à reprendre ici quand elles changent là-bas : posée quand le
+# manifeste signé ne les couvre pas.
 builtin_unit() {
   case "$1" in
     lprdv-update.service) cat <<'LPRDV_UNIT'
@@ -158,6 +178,21 @@ LPRDV_UNIT
 say() { printf '==> %s\n' "$*"; }
 die() { printf '!! %s\n' "$*" >&2; exit 1; }
 
+# La version du service qui tourne, demandée à sa console locale ; rien s'il
+# ne répond pas. Le jeton passe par un fichier et non par la ligne de
+# commande, que tout utilisateur de la machine peut lire.
+installed_version() {
+  [ -r /var/lib/lprdv/admin.token ] || return 1
+  (umask 077 && printf 'Authorization: Bearer %s\n' "$(cat /var/lib/lprdv/admin.token)" > "$work/console.auth")
+  curl -fs --max-time 5 -H "@$work/console.auth" "http://127.0.0.1:$ADMIN_PORT/api/status" \
+    | grep -o '"version":"[0-9A-Za-z.+-]*"' | head -n 1 | cut -d'"' -f4
+}
+
+# Tout le travail dans une fonction appelée à la dernière ligne : lancé par
+# « curl | bash », un téléchargement coupé en route laisserait bash exécuter
+# le début du script. Ainsi tronqué, il n'est qu'une fonction inachevée, et
+# rien ne s'exécute.
+main() {
 port=47900
 public_address=""
 label=""
@@ -165,6 +200,8 @@ announce=1
 firewall=1
 auto_update=""
 configured=0
+allow_downgrade=0
+now=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -177,6 +214,8 @@ while [ $# -gt 0 ]; do
     # pas réécrire le complément avec les valeurs par défaut.
     --no-auto-update) auto_update=0; shift ;;
     --auto-update) auto_update=1; shift ;;
+    --allow-downgrade) allow_downgrade=1; shift ;;
+    --now) now=1; shift ;;
     *) die "option inconnue : $1 (voir https://linkpearl-sync.github.io/heberger.html)" ;;
   esac
 done
@@ -188,7 +227,9 @@ case "$port" in
 esac
 { [ "$port" -ge 1 ] && [ "$port" -le 65535 ]; } || die "port hors bornes : $port"
 [ "$port" -ne "$ADMIN_PORT" ] || die "le port $ADMIN_PORT est celui de la console"
-if [ -n "$public_address" ] && ! printf '%s' "$public_address" | grep -Eq '^[A-Za-z0-9._-]{1,253}(:[0-9]{1,5})?$'; then
+# Le test de bash et non grep : grep lit ligne à ligne, et une valeur sur
+# deux lignes passait, sa seconde ligne devenant une directive de l'unité.
+if [ -n "$public_address" ] && ! [[ "$public_address" =~ ^[A-Za-z0-9._-]{1,253}(:[0-9]{1,5})?$ ]]; then
   die "adresse publique invalide : un nom ou une IPv4, éventuellement suivi de :port"
 fi
 # Le libellé passe entre guillemets dans ExecStart : on y refuse ce que systemd
@@ -238,10 +279,10 @@ for file in lprdv lprdv.service; do
     || die "somme de $file différente du manifeste signé, rien n'a été installé"
 done
 # L'unité de mise à jour tourne en root : la poser sans preuve rendrait la
-# signature décorative. Le manifeste ne couvre aujourd'hui que ce que la mise
-# à jour automatique remplace (lprdv et lprdv.service). Tant qu'il ne couvre
-# pas ces deux-là, on pose la copie intégrée à ce script, dont l'authenticité
-# est celle du site, et on ignore celle de la release.
+# signature décorative. Le manifeste signé la couvre depuis qu'elle est
+# publiée avec la release ; pour un manifeste plus ancien, qui ne couvre que
+# lprdv et lprdv.service, on pose la copie intégrée à ce script, dont
+# l'authenticité est celle du site, et on ignore celle de la release.
 for file in lprdv-update.service lprdv-update.timer; do
   if expected=$(manifest_sum "$work/lprdv.release.json" "$file"); then
     [ "$(sha256sum "$work/$file" | cut -d' ' -f1)" = "$expected" ] \
@@ -250,6 +291,30 @@ for file in lprdv-update.service lprdv-update.timer; do
     builtin_unit "$file" > "$work/$file"
   fi
 done
+
+# Sur un serveur qui tourne déjà, la version publiée ne passe que si elle
+# avance, et après son délai de garde : la mise à jour automatique attend 24 h
+# (une heure si urgente) pour laisser le temps de retirer une release qu'on
+# n'a pas voulue, et relancer ce script ne doit pas la court-circuiter. Une
+# release « latest » repointée vers une version plus ancienne ne fait pas
+# non plus redescendre un serveur.
+release_version=$(manifest_field "$work/lprdv.release.json" version) \
+  || die "le manifeste signé ne donne pas sa version, rien n'a été installé"
+installed_version=$(installed_version || true)
+if [ -n "$installed_version" ]; then
+  if version_newer "$installed_version" "$release_version" && [ "$allow_downgrade" -eq 0 ]; then
+    die "la version publiée ($release_version) est plus ancienne que celle qui tourne ($installed_version), rien n'a été installé (--allow-downgrade pour forcer)"
+  fi
+  if version_newer "$release_version" "$installed_version" && [ "$now" -eq 0 ]; then
+    signed=$(manifest_field "$work/lprdv.release.json" signed) \
+      || die "le manifeste signé ne donne pas son heure de signature, rien n'a été installé"
+    guard=86400
+    if [ "$(manifest_field "$work/lprdv.release.json" urgent || true)" = true ]; then guard=3600; fi
+    if [ $(( $(date +%s) - signed )) -lt "$guard" ]; then
+      die "la version $release_version est trop récente : la mise à jour automatique la posera à la fin de son délai de garde ($(( guard / 3600 )) h après sa signature). Rien n'a été installé (--now pour ne pas attendre)"
+    fi
+  fi
+fi
 
 say "Installation"
 # Relevé avant de poser les unités : un minuteur présent et coupé est un choix
@@ -350,3 +415,6 @@ done
 
 journalctl -u lprdv -n 30 --no-pager >&2 || true
 die "le service ne répond pas sur /healthz"
+}
+
+main "$@"

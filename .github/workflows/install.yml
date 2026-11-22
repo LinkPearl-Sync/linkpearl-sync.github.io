@@ -6,9 +6,9 @@ name: Essayer install.sh
 # qui peut changer sans que ce dépôt bouge.
 on:
   push:
-    paths: [install.sh, tests/**, .github/workflows/install.yml]
+    paths: [install.sh, scripts/**, tests/**, .github/workflows/install.yml]
   pull_request:
-    paths: [install.sh, tests/**, .github/workflows/install.yml]
+    paths: [install.sh, scripts/**, tests/**, .github/workflows/install.yml]
   workflow_dispatch:
   schedule:
     - cron: '41 6 * * 1'
@@ -30,6 +30,11 @@ jobs:
         # Clé jetable, manifeste et signature au format de la CI du service :
         # les cas refusés ne se rencontrent pas sur une vraie release.
         run: bash tests/verification.sh
+
+      - name: L'état du réseau n'est publié que signé par l'autorité
+        # Vecteur signé par NetworkStatus.Sign du service, clé jetable : une
+        # dérive de format entre les deux dépôts se voit ici.
+        run: python3 tests/reseau_test.py
 
       - name: Les unités intégrées suivent celles du service
         # install.sh pose sa propre copie de l'unité de mise à jour tant que
