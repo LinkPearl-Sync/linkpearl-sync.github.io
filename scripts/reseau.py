@@ -26,12 +26,30 @@ import os
 import re
 import socket
 import struct
+import subprocess
 import sys
+import tempfile
 import urllib.request
 
 HOST = "rdv.linkpearl.eorzea.events"
 PORT = 47900
 PUBLISHED = "https://linkpearl-sync.github.io/reseau.json"
+
+# Les clés publiques de l'autorité, points P-256 non compressés, recopiés de
+# Linkpearl/Core/Sync/ConsensusKeys.cs dans le dépôt du plugin. L'état du
+# réseau voyage en TCP nu : sans cette vérification, un observateur du trajet
+# réécrivait ce que le site publie, clé de l'autorité et empreinte comprises.
+AUTHORITY_KEYS = [
+    "04f3fbb81054e08f574092619a9b96f45ae73c419df531771871bf354148584f00"
+    "69d17361d5128aa32544eb474e84eaed0a444c8c2233efdf5e6ccf62f240cae8",
+]
+
+# La signature est le dernier champ, sur les octets exacts du document sans
+# elle (NetworkStatus.Sign dans le dépôt du service).
+SIGNATURE = re.compile(rb',"signature":"([0-9a-f]{128})"\}\Z')
+
+# En-tête DER fixe d'une clé publique P-256, avant le point (comme install.sh).
+SPKI_PREFIX = bytes.fromhex("3059301306072a8648ce3d020106082a8648ce3d030107034200")
 
 # RendezvousKind, dans Protocol/Core/Transport/Rendezvous/RendezvousWire.cs.
 ERROR = 0x06
@@ -44,7 +62,13 @@ MAX_FRAME = 64 * 1024
 TIMEOUT = 15
 
 STANDINGS = {"listed", "probation", "delisted"}
-MAX_TEXT = 256
+# Une adresse du réseau ouvert compte jusqu'à 255 octets, plus « :65535 » :
+# à 256, une seule adresse longue faisait refuser tout l'instantané.
+MAX_TEXT = 261
+
+# new Date(secondes * 1000) n'existe qu'à 8,64e15 ms près : au-delà, la page
+# lève une RangeError au formatage et reste vide.
+MAX_WHEN = 8_640_000_000_000
 
 # Deux lettres majuscules, rien d'autre : la page en fait le nom d'un fichier
 # de drapeau. « ZZ » est le « pays inconnu » de DB-IP, qu'on ne publie pas.
@@ -71,6 +95,47 @@ def read_frame(sock):
     if length == 0 or length > MAX_FRAME:
         raise Refused(f"trame de {length} octets")
     return read_exact(sock, length)
+
+
+def der_integer(value):
+    value = value.lstrip(b"\0") or b"\0"
+    if value[0] & 0x80:
+        value = b"\0" + value
+    return b"\x02" + bytes([len(value)]) + value
+
+
+def p1363_to_der(signature):
+    """r puis s, 32 octets chacun, vers la séquence DER qu'openssl lit."""
+    body = der_integer(signature[:32]) + der_integer(signature[32:])
+    return b"\x30" + bytes([len(body)]) + body
+
+
+def openssl_verifies(document, signature, point):
+    with tempfile.TemporaryDirectory() as work:
+        paths = {name: os.path.join(work, name) for name in ("key.der", "sig.der", "doc")}
+        for name, data in (("key.der", SPKI_PREFIX + point), ("sig.der", p1363_to_der(signature)), ("doc", document)):
+            with open(paths[name], "wb") as file:
+                file.write(data)
+        result = subprocess.run(
+            ["openssl", "dgst", "-sha256", "-keyform", "DER", "-verify", paths["key.der"],
+             "-signature", paths["sig.der"], paths["doc"]],
+            capture_output=True,
+            check=False,
+        )
+        return result.returncode == 0
+
+
+def authenticated(raw, keys=None):
+    """Le document sans sa signature, si l'une des clés de l'autorité l'a signé."""
+    match = SIGNATURE.search(raw)
+    if match is None:
+        raise Refused("état du réseau non signé")
+    document = raw[: match.start()] + b"}"
+    signature = bytes.fromhex(match.group(1).decode("ascii"))
+    for key in AUTHORITY_KEYS if keys is None else keys:
+        if openssl_verifies(document, signature, bytes.fromhex(key)):
+            return document
+    raise Refused("signature de l'état du réseau invalide")
 
 
 def fetch(host, port):
@@ -100,7 +165,14 @@ def fetch(host, port):
             chunks.append(frame[5:])
             page += 1
 
-    return json.loads(b"".join(chunks).decode("utf-8"))
+    status = json.loads(authenticated(b"".join(chunks)).decode("utf-8"))
+
+    # Signé, donc la clé annoncée est bien celle de l'autorité ; on vérifie
+    # quand même qu'elle est celle qu'on attend, puisque la page l'affiche.
+    authority = status.get("authority") if isinstance(status, dict) else None
+    if isinstance(authority, dict) and authority.get("publicKey") not in AUTHORITY_KEYS:
+        raise Refused("clé d'autorité inattendue")
+    return status
 
 
 class Countries:
@@ -164,7 +236,20 @@ def text(value):
 
 
 def when(value):
-    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+    return isinstance(value, int) and not isinstance(value, bool) and 0 <= value <= MAX_WHEN
+
+
+def optional_when(record, key):
+    return record.get(key) is None or when(record[key])
+
+
+def clean(error):
+    """Le texte d'une erreur, sans caractère de contrôle, pour une ligne ::warning::.
+
+    Il vient en partie du service, par une liaison TCP en clair : un saut de
+    ligne y ouvrirait une commande du runner (::add-mask::, ::stop-commands::).
+    """
+    return "".join(c if c.isprintable() else " " for c in str(error))[:200]
 
 
 def validate(status):
@@ -189,6 +274,8 @@ def validate(status):
             raise Refused("service malformé")
         if not text(service.get("address")) or not text(service.get("label")):
             raise Refused("adresse ou libellé malformé")
+        if not optional_when(service, "since") or not optional_when(service, "lastSeen"):
+            raise Refused("date de service malformée")
         if service.get("standing") not in STANDINGS:
             raise Refused(f"état inconnu {service.get('standing')!r}")
         if "country" in service and not (
@@ -200,6 +287,7 @@ def validate(status):
     if authority is not None and (
         not isinstance(authority, dict)
         or not text(authority.get("publicKey"))
+        or not when(authority.get("issued"))
         or not when(authority.get("expires"))
     ):
         raise Refused("autorité malformée")
@@ -225,14 +313,14 @@ def main():
         status = validate(fetch(host, port))
         source = f"{host}:{port}"
     except (OSError, ValueError, Refused) as error:
-        print(f"::warning::État du réseau injoignable ({error}), reprise de l'instantané publié", file=sys.stderr)
+        print(f"::warning::État du réseau injoignable ({clean(error)}), reprise de l'instantané publié", file=sys.stderr)
         try:
             status = validate(published())
             source = PUBLISHED
         except (OSError, ValueError, Refused) as fallback:
             # Pas d'échec du déploiement pour autant : la page dit qu'elle
             # n'a pas d'état, et le reste du site doit partir quand même.
-            print(f"::warning::Aucun instantané publié non plus ({fallback}), reseau.json absent", file=sys.stderr)
+            print(f"::warning::Aucun instantané publié non plus ({clean(fallback)}), reseau.json absent", file=sys.stderr)
             return 0
 
     geo = os.environ.get("RESEAU_PAYS")
@@ -241,7 +329,7 @@ def main():
             locate(status, Countries(geo))
         except (OSError, ValueError, EOFError) as error:
             # Un drapeau manquant ne vaut pas un site non publié.
-            print(f"::warning::Base des pays illisible ({error}), services sans pays", file=sys.stderr)
+            print(f"::warning::Base des pays illisible ({clean(error)}), services sans pays", file=sys.stderr)
 
     with open(output, "w", encoding="utf-8") as file:
         json.dump(status, file, ensure_ascii=False, separators=(",", ":"))
