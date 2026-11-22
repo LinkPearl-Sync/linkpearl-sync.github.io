@@ -112,6 +112,20 @@ if manifest_sum "$work/m.json" lprdv-update.timer > /dev/null; then ko "somme ab
 printf '{"files":{"lprdv":"%s","lprdv":"%s"}}' "$(sum "$work/lprdv")" "$(sum "$work/lprdv.service")" > "$work/double.json"
 if manifest_sum "$work/double.json" lprdv > /dev/null; then ko "nom en double accepté"; else ok "nom en double refusé"; fi
 
+# Version et délai de garde, lus dans le manifeste signé : c'est d'eux que
+# dépend le refus d'un retour en arrière ou d'une version trop fraîche.
+printf '{"format":2,"version":"1.10.0","signed":1790000000,"urgent":true,"files":{"lprdv":"%s"}}' "$(sum "$work/lprdv")" > "$work/champs.json"
+[ "$(manifest_field "$work/champs.json" version)" = 1.10.0 ] && ok "version lue" || ko "version"
+[ "$(manifest_field "$work/champs.json" signed)" = 1790000000 ] && ok "heure de signature lue" || ko "heure de signature"
+[ "$(manifest_field "$work/champs.json" urgent)" = true ] && ok "urgence lue" || ko "urgence"
+if manifest_field "$work/champs.json" absent > /dev/null; then ko "champ absent inventé"; else ok "champ absent signalé"; fi
+printf '{"version":"1.0.0","version":"9.0.0"}' > "$work/deux.json"
+if manifest_field "$work/deux.json" version > /dev/null; then ko "version en double acceptée"; else ok "version en double refusée"; fi
+
+version_newer 1.10.0 1.9.3 && ok "1.10.0 plus récente que 1.9.3" || ko "ordre numérique"
+if version_newer 1.9.3 1.10.0; then ko "1.9.3 plus récente que 1.10.0"; else ok "1.9.3 plus ancienne que 1.10.0"; fi
+if version_newer 1.2.3 1.2.3; then ko "égalité prise pour plus récente"; else ok "égalité pas plus récente"; fi
+
 if [ "$failures" -ne 0 ]; then
   echo "$failures échec(s)" >&2
   exit 1
