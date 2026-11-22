@@ -30,11 +30,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     # Actions épinglées sur une empreinte de commit : une étiquette se
     # redéplace, et ce workflow publie l'adresse que Dalamud interroge.
@@ -124,6 +121,18 @@ jobs:
         with:
           path: out
 
+  # Le déploiement dans son propre job, comme dans le modèle officiel de Pages.
+  # Dans le même job, il cherchait l'artefact une demi-seconde après son envoi,
+  # avant que l'API de GitHub ne le liste : « No artifacts named github-pages »,
+  # trois fois de suite le 22 novembre 2026, et ni le site ni repo.json ne
+  # partaient plus.
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Déployer
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e  # v4
